@@ -3,88 +3,36 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MET∃OR · surface studies</title>
+<title>MET∃OR · studies</title>
 <style>
   :root{--bg:#05080c;--pn:#0a0f16;--ink:#e6edf3;--mu:#66707f;--bd:#222b38;
-        --am:#f0a94a;--bl:#5aa7e8;--gr:#4ade80;--co:#e05d3d;
+        --am:#f0a94a;--bl:#5aa7e8;--gr:#4ade80;
         --f:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--f);padding:40px 5vw 70px;
-       display:flex;flex-direction:column;align-items:center}
-  .col{width:min(880px,100%)}
-  h1{font-size:13px;font-weight:400;letter-spacing:.2em;margin-bottom:6px}
-  .sub{font-size:11.5px;color:var(--mu);line-height:1.9;max-width:640px;margin-bottom:8px}
-  .sub b{color:var(--ink);font-weight:400}
-  .note{font-size:10.5px;color:var(--bd);letter-spacing:.1em;margin-bottom:30px;
-        border-left:1px solid var(--bd);padding-left:12px;line-height:1.9}
-  a.s{display:block;text-decoration:none;color:inherit;border:1px solid var(--bd);
-      background:var(--pn);padding:16px 18px;margin-bottom:9px;transition:border-color .18s,transform .18s}
-  a.s:hover{border-color:var(--am);transform:translateY(-1px)}
-  a.s:focus-visible{outline:2px solid var(--gr);outline-offset:2px}
-  .hd{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
-  .no{font-size:10.5px;color:var(--bd);letter-spacing:.16em}
-  .nm{font-size:14px;letter-spacing:.14em}
-  .tag{margin-left:auto;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--bd)}
-  .mech{font-size:11.5px;color:var(--mu);margin-top:7px;line-height:1.8}
-  .tw{font-size:11px;color:var(--bd);margin-top:5px;line-height:1.8}
-  .tw b{color:var(--mu);font-weight:400}
-  footer{margin-top:34px;font-size:10.5px;color:var(--bd);line-height:2;border-top:1px solid var(--bd);padding-top:16px}
+  body{background:var(--bg);color:var(--ink);font-family:var(--f);
+       min-height:100%;padding:9vh 6vw;display:flex;flex-direction:column;align-items:center}
+  .col{width:min(620px,100%)}
+  h1{font-size:12px;font-weight:400;letter-spacing:.26em;margin-bottom:38px}
   .p{color:var(--am)}.m{color:var(--bl)}.z{color:var(--gr)}
+  a.s{display:flex;align-items:baseline;gap:16px;text-decoration:none;color:inherit;
+      padding:15px 4px;border-bottom:1px solid var(--bd);transition:padding-left .18s ease}
+  a.s:hover{padding-left:12px}
+  a.s:hover .nm{color:var(--am)}
+  a.s:focus-visible{outline:1px solid var(--gr);outline-offset:3px}
+  .no{font-size:10px;letter-spacing:.2em;color:var(--bd);flex:none;width:2.4em}
+  .nm{font-size:13.5px;letter-spacing:.2em;transition:color .18s}
+  .of{margin-left:auto;font-size:10.5px;color:var(--bd);letter-spacing:.06em;text-align:right}
 </style>
 </head>
 <body>
 <div class="col">
-  <h1><span class="p">M</span><span class="m">E</span><span class="z">T</span><span class="z">∃</span><span class="m">O</span><span class="p">R</span> · SURFACE STUDIES</h1>
-  <p class="sub">One mechanism each, isolated so it can be judged on its own — the same form as the toy studies, turned on the surface instead of on an instrument. <b>None of these is a page.</b> Each is a single behaviour, built far enough to be felt and no further.</p>
-  <p class="note">Each is self-contained — no build, no dependency, one file.<br>
-     Which means any of them can drop straight into <b style="color:var(--mu)">gallery/</b> as a lore module and mount on the console with no ceremony.</p>
+  <h1><span class="p">M</span><span class="m">E</span><span class="z">T</span><span class="z">∃</span><span class="m">O</span><span class="p">R</span> &nbsp;STUDIES</h1>
 
-  <a class="s" href="s01-dwell.html">
-    <div class="hd"><span class="no">S-01</span><span class="nm">DWELL</span><span class="tag">the ethos, as physics</span></div>
-    <div class="mech">Legibility is a function of how still you are. Move and the mark dissolves; rest and it resolves; hold 2.5 s and it blooms. Clicking costs you.</div>
-    <div class="tw"><b>twist —</b> the free-run bloom made the only way in. A page that pays out for the one behaviour attention design punishes.</div>
-  </a>
-
-  <a class="s" href="s02-carriage.html">
-    <div class="hd"><span class="no">S-02</span><span class="nm">CARRIAGE</span><span class="tag">nothing ships plain</span></div>
-    <div class="mech">All text is carried in balanced ternary, coloured by sign, and decodes only under proximity. You read the page the way you read an instrument — close, and one part at a time.</div>
-    <div class="tw"><b>twist —</b> CIPHER.md applied to the website itself. The page looks like notation until you lean in.</div>
-  </a>
-
-  <a class="s" href="s03-boustrophedon.html">
-    <div class="hd"><span class="no">S-03</span><span class="nm">BOUSTROPHEDON</span><span class="tag">typography</span></div>
-    <div class="mech">Alternate lines are written in the return direction, and the sweep decides how far the return has turned. At the seam they are edge-on — legible to neither world.</div>
-    <div class="tw"><b>twist —</b> the name's own etymology as the page's typesetting. Unreadable on purpose, which is the point.</div>
-  </a>
-
-  <a class="s" href="s04-phosphor.html">
-    <div class="hd"><span class="no">S-04</span><span class="nm">PHOSPHOR</span><span class="tag">the felt quality</span></div>
-    <div class="mech">The same motion twice, side by side: a conventional easing curve against the engine's own decay — half-life .12 s — with everything breathing at f₀ 1.2 Hz.</div>
-    <div class="tw"><b>twist —</b> the house physics as the house style. The difference isn't visible; it's felt. Nothing snaps, everything settles.</div>
-  </a>
-
-  <a class="s" href="s05-sweep.html">
-    <div class="hd"><span class="no">S-05</span><span class="nm">SWEEP</span><span class="tag">navigation · boldest</span></div>
-    <div class="mech">No scroll, ever. θ is the only axis, and destinations are positions you arrive at rather than links in a row. Drag to travel; a station opens on arrival.</div>
-    <div class="tw"><b>twist —</b> navigation as tuning rather than choosing. The most dangerous idea here: beautiful, and it can cost you the routing.</div>
-  </a>
-
-  <a class="s" href="s06-register.html">
-    <div class="hd"><span class="no">S-06</span><span class="nm">REGISTER</span><span class="tag">framing · anti-metric</span></div>
-    <div class="mech">The page is a filed document. Registered items take measures and dispositions; one row has neither and cannot be given one. The counter counts in base 3 and reads 000 forever.</div>
-    <div class="tw"><b>twist —</b> absence as the mark. The subject of the document is the row that isn't in it — and the page states, as a readout, that it measures nothing.</div>
-  </a>
-
-  <a class="s" href="s07-anomaly.html">
-    <div class="hd"><span class="no">S-07</span><span class="nm">ANOMALY</span><span class="tag">the secret</span></div>
-    <div class="mech">A layout whose mirror symmetry is real, broken in exactly one place. Five letters reflect honestly about the datum. R does not.</div>
-    <div class="tw"><b>twist —</b> two mirrors composed are a direct isometry, so R cannot arrive backwards — C₁, the only letter with no symmetry of its own. Unrewarded except by noticing.</div>
-  </a>
-
-  <footer>
-    Studies are not proposals — they isolate a mechanic so it can be kept, combined or thrown out on its own merits.<br>
-    <span style="color:var(--mu)">S-04 + S-01 + S-02 compound well: the feel, the ethos, the surface. S-05 is the one that trades routing for art.</span>
-  </footer>
+  <a class="s" href="s01-dwell.html"><span class="no">01</span><span class="nm">DWELL</span><span class="of">stillness resolves it</span></a>
+  <a class="s" href="s02-carriage.html"><span class="no">02</span><span class="nm">CARRIAGE</span><span class="of">ternary · the far-world reading</span></a>
+  <a class="s" href="s03-boustrophedon.html"><span class="no">03</span><span class="nm">BOUSTROPHEDON</span><span class="of">the furrow turns, the words don't</span></a>
+  <a class="s" href="s04-phosphor.html"><span class="no">04</span><span class="nm">PHOSPHOR</span><span class="of">decay + breath vs easing</span></a>
+  <a class="s" href="s05-sweep.html"><span class="no">05</span><span class="nm">SWEEP</span><span class="of">the engine, driven to its stations</span></a>
 </div>
 </body>
 </html>
