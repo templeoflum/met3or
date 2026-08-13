@@ -46,6 +46,11 @@
 <script>
 (function(){
 var S=4.0,CW=380*S,CH=264*S,SEAM=140*S,DP=2;  // capture-grade sheet: figure ≥2× any placement; display CSS-capped
+// Canvas parses ctx.font with the CSS font shorthand grammar, which does NOT
+// substitute var() — 'Npx var(--font-mono)' fails to parse, the assignment is
+// dropped, and the context keeps its default 10px sans-serif. Every label on
+// every layer was rendering at that default. The stack must be literal here.
+var MONO='"SF Mono",ui-monospace,"DejaVu Sans Mono",Menlo,Consolas,monospace';
 var cv=document.getElementById('engC'),c=cv.getContext('2d');
 cv.width=CW*DP;cv.height=CH*DP;c.scale(DP,DP);
 // ---- full-grammar panes (ported from render.py) ----
@@ -61,7 +66,7 @@ function telPane(g,V){
  g.beginPath();g.moveTo(w/2,10);g.lineTo(w/2,h-92);g.stroke();
  g.beginPath();g.moveTo(14,h-92);g.lineTo(w-14,h-92);g.stroke();
  g.textBaseline='middle';
- function row(x,y,lab,val,vc){g.font='25px var(--font-mono)';g.textAlign='left';g.fillStyle=MU+'1)';g.fillText(lab,x,y);g.textAlign='right';g.fillStyle=vc||INKc;g.fillText(val,x+455,y);}
+ function row(x,y,lab,val,vc){g.font='25px '+MONO;g.textAlign='left';g.fillStyle=MU+'1)';g.fillText(lab,x,y);g.textAlign='right';g.fillStyle=vc||INKc;g.fillText(val,x+455,y);}
  var L=48,Rc=590,y0=52,dy=38,deg=V.m*60-30,supd=['\u2070','\u00b9','\u00b2'];
  row(L,y0,'\u03b8',(deg>=0?'+':'')+deg.toFixed(2)+'\u00b0');
  row(L,y0+dy,'m',V.m.toFixed(4));
@@ -81,7 +86,7 @@ function telPane(g,V){
  row(Rc,y0+5*dy,'group',GN[V.li],V.li===5?AMc:INKc);
  row(Rc,y0+6*dy,'frame\u2083',tern(V.fi),GRc);
  row(Rc,y0+7*dy,'clock','f\u2080 1.2 Hz \u00b7 72 bpm');
- g.font='22px var(--font-mono)';g.textAlign='left';g.fillStyle=MU+'1)';
+ g.font='22px '+MONO;g.textAlign='left';g.fillStyle=MU+'1)';
  g.fillText('world A',48,h-64);g.fillText('world B',48,h-30);
  g.fillStyle=MU+'0.25)';g.fillRect(230,h-74,630,20);g.fillRect(230,h-40,630,20);
  g.fillStyle=BLc;var wa=630*(1-V.m);if(wa>0)g.fillRect(230,h-74,wa,20);
@@ -110,7 +115,7 @@ function scopePane(g,t,m,col,q){
  g.strokeStyle=MU+'0.5)';g.lineWidth=1;g.strokeRect(sx0,sy0,sx1-sx0,sy1-sy0);
  g.strokeStyle=MU+'0.22)';g.beginPath();g.moveTo(sx0,(sy0+sy1)/2);g.lineTo(sx1,(sy0+sy1)/2);g.stroke();
  if(q.length>1){g.strokeStyle=GRc;g.lineWidth=3;g.beginPath();for(var i3=0;i3<q.length;i3++){var x=sx0+i3*(sx1-sx0)/(q.length-1),yy3=sy1-6-q[i3]*(sy1-sy0-14);if(i3===0)g.moveTo(x,yy3);else g.lineTo(x,yy3);}g.stroke();}
- g.font='22px var(--font-mono)';g.textBaseline='middle';g.fillStyle=MU+'0.7)';
+ g.font='22px '+MONO;g.textBaseline='middle';g.fillStyle=MU+'0.7)';
  g.textAlign='left';g.fillText('env \u00b7 f\u2080',sx0+10,sy0+18);g.fillText('25 ms',fx0+10,fy0+18);
  g.textAlign='right';g.fillText('72 bpm',sx1-10,sy0+18);g.fillText(col>0.1?('wow \u2212'+(2.5*col).toFixed(1)+'%'):'lock 100/3 rpm',fx1-10,fy0+18);
 }
@@ -153,7 +158,7 @@ function chain(p1,p2,col,w,a){var x1=p1[0],y1=p1[1],x2=p2[0],y2=p2[1],L=Math.hyp
 while(t<L){var seg=pat[pi%4][0],on=pat[pi%4][1];pi++;var t2=Math.min(L,t+seg);if(on)ln([x1+(x2-x1)*t/L,y1+(y2-y1)*t/L],[x1+(x2-x1)*t2/L,y1+(y2-y1)*t2/L],col,w,a);t=t2;}}
 function arrow(x,y,dx,col,a){d.fillStyle=col;d.globalAlpha=a;d.beginPath();d.moveTo(X(x),X(y));d.lineTo(X(x+3.2*dx),X(y-1.1));d.lineTo(X(x+3.2*dx),X(y+1.1));d.fill();d.globalAlpha=1;}
 function cross(x,y,r,col,a){ln([x-r,y],[x+r,y],col,.45,a);ln([x,y-r],[x,y+r],col,.45,a);}
-function txt(x,y,s,col,px,al){d.fillStyle=col;d.globalAlpha=1;d.font=px*S+'px var(--font-mono)';d.textAlign=al||'center';d.textBaseline='middle';d.fillText(s,X(x),X(y));}
+function txt(x,y,s,col,px,al){d.fillStyle=col;d.globalAlpha=1;d.font=px*S+'px '+MONO;d.textAlign=al||'center';d.textBaseline='middle';d.fillText(s,X(x),X(y));}
 [[26,30],[354,30],[26,212],[354,212]].forEach(function(q){cross(q[0],q[1],4,MUT,.6);});
 ln([166,28],[166,41],MUT,.45,.75);ln([190,28],[190,41],MUT,.45,.75);ln([166,34],[190,34],MUT,.45,.85);
 arrow(166,34,1,MUT,.85);arrow(190,34,-1,MUT,.85);txt(203,34,'Δ24',MUT,9,'left');
@@ -163,7 +168,14 @@ chain([190,44],[190,206],MUT,.4,.24);
 [[20,'0'],[133,'1'],[247,'2'],[360,'10']].forEach(function(t){ln([t[0],SEAM/S-6],[t[0],SEAM/S],MUT,.5,.85);txt(t[0],SEAM/S-9.5,t[1],MUT,7.5);});
 [58,96,171,209,285,322].forEach(function(x){ln([x,SEAM/S-3],[x,SEAM/S],MUT,.45,.6);});
 d.globalAlpha=.38;d.strokeStyle=BLUE;d.setLineDash([3,4]);d.lineWidth=.6*S;d.beginPath();d.arc(X(262),X(108),X(24),0,7);d.stroke();d.beginPath();d.arc(X(262),X(172),X(24),0,7);d.stroke();d.setLineDash([]);d.globalAlpha=1;
-txt(176,220,'σᵥ σₕ σᵥ σₕ D∞',MUT,12);txt(238,220,'C₁',AMBER,12);txt(190,236,'w = h/φ · λ = 530 ± 60 nm',MUT,12);
+// the symmetry groups and the wavelength — centred on the sheet, stacked.
+// The group row is two colours (D∞ carries the muted run, C₁ the R's amber),
+// so it is measured as one line and laid out from a centred origin.
+(function(){var A='σᵥ σₕ σᵥ σₕ D∞',B='C₁',GAP=5,CX=190;
+ d.font=12*S+'px '+MONO;
+ var wA=d.measureText(A).width/S,wB=d.measureText(B).width/S,x0=CX-(wA+GAP+wB)/2;
+ txt(x0,219,A,MUT,12,'left');txt(x0+wA+GAP,219,B,AMBER,12,'left');
+ txt(CX,237,'w = h/φ · λ = 530 ± 60 nm',MUT,12);})();
 // title block
 ln([20,248],[360,248],MUT,.5,.78);ln([20,262],[360,262],MUT,.5,.78);ln([20,248],[20,262],MUT,.5,.78);ln([360,248],[360,262],MUT,.5,.78);
 [128,214,300].forEach(function(xv){ln([xv,248],[xv,262],MUT,.45,.6);});
