@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>S-02 · carriage</title>
+<style>
+  :root{--bg:#05080c;--pn:#0a0f16;--ink:#e6edf3;--mu:#66707f;--bd:#222b38;
+        --am:#f0a94a;--bl:#5aa7e8;--gr:#4ade80;--co:#e05d3d;
+        --f:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--f);display:flex;flex-direction:column;overflow:hidden}
+  header,footer{padding:12px 18px;color:var(--mu);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;flex:none;display:flex;gap:14px}
+  header{border-bottom:1px solid var(--bd)} footer{border-top:1px solid var(--bd);text-transform:none;letter-spacing:0;font-size:11px}
+  main{flex:1;display:flex;flex-direction:column;justify-content:center;gap:26px;padding:20px 6vw;min-height:0;overflow:auto}
+  .row{line-height:2.5}
+  .w{display:inline-block;margin-right:1.1em;white-space:nowrap;transition:none}
+  .t{display:inline-block;letter-spacing:.04em}
+  .p{color:var(--am)}.m{color:var(--bl)}.z{color:var(--gr)}
+  .plain{color:var(--ink)}
+  .cap{font-size:10.5px;color:var(--bd);letter-spacing:.1em}
+  .key{display:flex;gap:16px;font-size:10.5px;color:var(--mu)}
+</style>
+</head>
+<body>
+<header><b style="color:var(--ink);font-weight:400">S-02</b><span>carriage</span>
+  <span style="margin-left:auto;color:var(--bd)">bring the cursor near — the notation becomes language</span></header>
+
+<main>
+  <div class="key">
+    <span><b class="p">+</b> +1 · 590 nm</span><span><b class="z">0</b> 0 · 530 nm</span><span><b class="m">−</b> −1 · 470 nm</span>
+    <span style="margin-left:auto">v = 9t₂ + 3t₁ + t₀ · three trits span −13…+13</span>
+  </div>
+  <div id="body"></div>
+  <div class="cap" id="state">nothing decoded</div>
+</main>
+
+<footer>
+  <span><b style="color:var(--mu)">one mechanism —</b> every word is carried in balanced ternary and resolves only under proximity.</span>
+  <span style="margin-left:auto;color:var(--bd)">twist: nothing ships plain — the canon's own law, applied to the page</span>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  // ── the cipher, per CIPHER.md ─────────────────────────────────────────
+  // A is +1 … M is +13; N is −1 … Z is −13; the seam carries the space (000).
+  // Each letter's mirror is its conjugate thirteen away — crossing is ROT13.
+  const val = c => c===" " ? 0 : (c.charCodeAt(0)-65 < 13 ? c.charCodeAt(0)-64 : -(c.charCodeAt(0)-65-12));
+  const trits = v => { const t=[]; for(let k=0;k<3;k++){ const r=((v+1)%3+3)%3-1; t.push(r); v=(v-r)/3; } return t.reverse(); };
+  const SIGN = {"1":"+","0":"0","-1":"−"};
+  const CLS  = {"+":"p","0":"z","−":"m"};
+
+  const LINES=[
+    "THE ESCAPED ITEM IS NOT NAMED",
+    "THAT IS HOW YOU WILL FIND IT",
+    "REGISTERED ITEMS GET MEASURES AND DISPOSITIONS",
+    "UNREGISTERED ITEMS GET NOTHING",
+  ];
+
+  const bodyEl=document.getElementById("body"), state=document.getElementById("state");
+  const words=[];
+
+  for(const line of LINES){
+    const row=document.createElement("div"); row.className="row";
+    for(const w of line.split(" ")){
+      const el=document.createElement("span"); el.className="w";
+      const enc=document.createElement("span"); enc.className="t";
+      // one triple per character, most significant first
+      for(const ch of w){
+        for(const t of trits(val(ch))){
+          const s=document.createElement("span");
+          s.textContent=SIGN[String(t)];
+          s.className=CLS[SIGN[String(t)]];
+          enc.appendChild(s);
+        }
+        enc.appendChild(Object.assign(document.createElement("span"),{textContent:" "}));
+      }
+      const plain=document.createElement("span");
+      plain.className="plain"; plain.textContent=w; plain.style.display="none";
+      el.append(enc,plain); row.appendChild(el);
+      words.push({el,enc,plain,w});
+    }
+    bodyEl.appendChild(row);
+  }
+
+  // ── proximity decodes ─────────────────────────────────────────────────
+  // The reach is deliberately short. You cannot read the page at a glance;
+  // you read it the way you read an instrument — one part at a time, close.
+  const REACH=120;
+  let mx=-9999,my=-9999;
+  addEventListener("pointermove",e=>{mx=e.clientX;my=e.clientY;},{passive:true});
+  addEventListener("pointerleave",()=>{mx=my=-9999;},{passive:true});
+
+  function frame(){
+    let open=0;
+    for(const o of words){
+      const r=o.el.getBoundingClientRect();
+      const cx=r.left+r.width/2, cy=r.top+r.height/2;
+      const d=Math.hypot(mx-cx,my-cy);
+      const near=Math.max(0,1-d/REACH);
+      if(near>0.55){
+        if(o.plain.style.display==="none"){o.plain.style.display="";o.enc.style.display="none";}
+        o.el.style.opacity="1"; open++;
+      }else{
+        if(o.plain.style.display===""){o.plain.style.display="none";o.enc.style.display="";}
+        // Resting opacity has to stay high enough that the sign colours read
+        // as texture — the amber/blue/green field IS the palindrome, and
+        // dimming it to a wash throws away the only thing legible at distance.
+        o.el.style.opacity=(0.62+0.38*near).toFixed(3);
+      }
+    }
+    state.textContent = open ? open+" word"+(open>1?"s":"")+" decoded — the rest is still carriage"
+                             : "nothing decoded";
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

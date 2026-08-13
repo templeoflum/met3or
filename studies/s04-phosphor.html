@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>S-04 · phosphor</title>
+<style>
+  :root{--bg:#05080c;--pn:#0a0f16;--ink:#e6edf3;--mu:#66707f;--bd:#222b38;
+        --am:#f0a94a;--bl:#5aa7e8;--gr:#4ade80;--co:#e05d3d;
+        --f:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--f);display:flex;flex-direction:column;overflow:hidden}
+  header,footer{padding:12px 18px;color:var(--mu);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;flex:none;display:flex;gap:14px}
+  header{border-bottom:1px solid var(--bd)} footer{border-top:1px solid var(--bd);text-transform:none;letter-spacing:0;font-size:11px}
+  main{flex:1;display:grid;grid-template-columns:1fr 1fr;min-height:0}
+  .pane{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;padding:18px;min-width:0}
+  .pane+.pane{border-left:1px solid var(--bd)}
+  .tag{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--bd)}
+  .tag b{font-weight:400}
+  .track{width:min(300px,34vw);height:1px;background:var(--bd);position:relative}
+  .dot{position:absolute;top:50%;width:13px;height:13px;border-radius:50%;margin:-6.5px 0 0 -6.5px;background:var(--gr)}
+  .card{width:min(300px,34vw);border:1px solid var(--bd);background:var(--pn);padding:14px;font-size:11px;color:var(--mu)}
+  .card b{color:var(--ink);font-weight:400;display:block;margin-bottom:5px;font-size:12.5px}
+  button{background:none;border:1px solid var(--bd);color:var(--am);font:inherit;font-size:11px;padding:4px 16px;cursor:pointer}
+  .bar{padding:10px 18px;display:flex;gap:14px;align-items:center;border-top:1px solid var(--bd);font-size:10.5px;color:var(--mu);flex:none}
+</style>
+</head>
+<body>
+<header><b style="color:var(--ink);font-weight:400">S-04</b><span>phosphor</span>
+  <span style="margin-left:auto;color:var(--bd)">the same motion, twice — one of them is alive</span></header>
+
+<main>
+  <div class="pane">
+    <div class="tag">left · <b style="color:var(--mu)">standard easing</b> · cubic-bezier</div>
+    <div class="track"><div class="dot" id="dA"></div></div>
+    <div class="card" id="cA"><b>Ser. 0006</b>calibrated 1988 · whereabouts unknown</div>
+  </div>
+  <div class="pane">
+    <div class="tag">right · <b style="color:var(--gr)">phosphor + breath</b> · half-life .12 s · f₀ 1.2 Hz</div>
+    <div class="track"><div class="dot" id="dB" style="background:var(--am)"></div></div>
+    <div class="card" id="cB"><b>Ser. 0006</b>calibrated 1988 · whereabouts unknown</div>
+  </div>
+</main>
+
+<div class="bar">
+  <button id="go">drive both</button>
+  <span id="state">idle</span>
+  <span style="margin-left:auto;color:var(--bd)">the difference is not visible — it is felt</span>
+</div>
+
+<footer>
+  <span><b style="color:var(--mu)">one mechanism —</b> replace easing curves with the engine's own decay, and put every element on the project's clock.</span>
+  <span style="margin-left:auto;color:var(--bd)">twist: the house physics as the house style</span>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  // ── the house physics ────────────────────────────────────────────────
+  // The engine's phosphor decays with a half-life of ~0.12 s. An element
+  // that settles on that curve reads as light leaving a screen rather than
+  // as a widget animating: it never arrives, it approaches. Everything also
+  // breathes at f₀ = 1.2 Hz — 72 bpm, a resting heart rate.
+  const HALF=0.12, F0=1.2;
+  const decay=dt=>Math.pow(0.5,dt/HALF);         // fraction of error remaining
+
+  const dA=document.getElementById("dA"), dB=document.getElementById("dB");
+  const cA=document.getElementById("cA"), cB=document.getElementById("cB");
+  const state=document.getElementById("state");
+
+  let target=0;                                   // 0 or 1, both panes share it
+  let a=0, b=0, tA0=0, animA=false;
+  let last=performance.now();
+
+  document.getElementById("go").onclick=()=>{
+    target=target?0:1; tA0=performance.now(); animA=true;
+    state.textContent=target?"driven →":"← released";
+  };
+
+  function frame(now){
+    const dt=Math.min(0.05,(now-last)/1000); last=now;
+
+    // LEFT — a conventional 420ms cubic-bezier(.4,0,.2,1). It arrives, and
+    // the arrival is the thing you notice.
+    if(animA){
+      const t=Math.min(1,(now-tA0)/420);
+      const e=t<0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;
+      a=(target? e : 1-e);
+      if(t>=1) animA=false;
+    }
+
+    // RIGHT — exponential settle on the phosphor half-life. No duration, no
+    // curve to author: it is the same law the beam obeys.
+    b += (target-b)*(1-decay(dt));
+
+    const breath=Math.sin(now/1000*Math.PI*2*F0);
+
+    const W=dA.parentElement.clientWidth;
+    dA.style.left=(a*W)+"px";
+    dB.style.left=(b*W)+"px";
+    // the trail: only the phosphor side leaves one
+    dB.style.boxShadow=`0 0 ${(8+10*Math.abs(target-b)).toFixed(1)}px var(--am)`;
+    dB.style.transform=`scale(${(1+breath*0.05).toFixed(3)})`;
+
+    cA.style.borderColor=a>0.5?"#66707f":"var(--bd)";
+    cA.style.opacity=(0.55+0.45*a).toFixed(3);
+
+    cB.style.borderColor=`rgba(240,169,74,${(0.18+0.6*b).toFixed(3)})`;
+    cB.style.opacity=(0.55+0.45*b).toFixed(3);
+    cB.style.transform=`translateY(${(-2*b+breath*0.7*b).toFixed(2)}px)`;
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>S-01 · dwell</title>
+<style>
+  :root{--bg:#05080c;--pn:#0a0f16;--ink:#e6edf3;--mu:#66707f;--bd:#222b38;
+        --am:#f0a94a;--bl:#5aa7e8;--gr:#4ade80;--co:#e05d3d;
+        --f:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--f);
+       display:flex;flex-direction:column;cursor:crosshair;overflow:hidden}
+  header,footer{padding:12px 18px;color:var(--mu);font-size:10.5px;letter-spacing:.14em;
+                text-transform:uppercase;flex:none;display:flex;gap:14px}
+  header{border-bottom:1px solid var(--bd)} footer{border-top:1px solid var(--bd);text-transform:none;letter-spacing:0;font-size:11px}
+  main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;min-height:0}
+  #word{font-size:clamp(38px,11vw,96px);letter-spacing:.16em;display:flex}
+  #word span{display:inline-block;will-change:transform,opacity,filter}
+  .p{color:var(--am)}.m{color:var(--bl)}.z{color:var(--gr)}
+  #line{font-size:12.5px;color:var(--mu);max-width:600px;text-align:center;padding:0 20px;line-height:1.9}
+  #line span{display:inline-block;white-space:pre}
+  .meter{width:min(520px,80vw);height:2px;background:var(--bd);position:relative}
+  .meter i{position:absolute;left:0;top:0;bottom:0;background:var(--gr);width:0%}
+  .cap{font-size:10.5px;color:var(--bd);letter-spacing:.1em}
+</style>
+</head>
+<body>
+<header><b style="color:var(--ink);font-weight:400">S-01</b><span>dwell</span>
+  <span style="margin-left:auto;color:var(--bd)">move to dissolve · be still to read</span></header>
+
+<main>
+  <div id="word"></div>
+  <div id="line"></div>
+  <div class="meter"><i id="fill"></i></div>
+  <div class="cap" id="state">stillness 0.00 · dissolved</div>
+</main>
+
+<footer>
+  <span><b style="color:var(--mu)">one mechanism —</b> legibility is a function of how still you are, not of what you click.</span>
+  <span style="margin-left:auto;color:var(--bd)">twist: the free-run bloom, made the only way in</span>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  // ── the mark, coloured by the palindrome + − 0 0 − + ────────────────
+  const WORD=[["M","p"],["E","m"],["T","z"],["∃","z"],["O","m"],["R","p"]];
+  const LINE="ser. 0006 · calibrated 1988 · whereabouts unknown";
+
+  const wordEl=document.getElementById("word"), lineEl=document.getElementById("line");
+  const fill=document.getElementById("fill"), state=document.getElementById("state");
+
+  const letters=WORD.map(([ch,cls])=>{
+    const s=document.createElement("span"); s.textContent=ch; s.className=cls;
+    wordEl.appendChild(s); return s;
+  });
+  const chars=[...LINE].map(ch=>{
+    const s=document.createElement("span"); s.textContent=ch;
+    lineEl.appendChild(s); return s;
+  });
+
+  // ── stillness: rises while the pointer rests, falls the moment it moves ──
+  // This is the whole idea. Velocity is the enemy of legibility, so the page
+  // pays out for the one behaviour attention-design punishes: stopping.
+  let still=0, vel=0, px=null, py=null, last=performance.now();
+  const DWELL=2.5;                     // seconds to full resolve — the canon dwell
+
+  addEventListener("pointermove",e=>{
+    if(px!==null) vel+=Math.hypot(e.clientX-px,e.clientY-py);
+    px=e.clientX; py=e.clientY;
+  },{passive:true});
+  addEventListener("pointerdown",()=>{ vel+=140; },{passive:true});   // clicking costs you
+  addEventListener("scroll",()=>{ vel+=140; },{passive:true});
+
+  // deterministic per-character jitter, so dissolution has a fixed grain
+  const seed=i=>{ const x=Math.sin(i*127.1)*43758.5453; return x-Math.floor(x); };
+
+  function frame(now){
+    const dt=Math.min(0.05,(now-last)/1000); last=now;
+
+    // velocity decays fast; stillness accrues only in its absence
+    const moving=Math.min(1,vel/26);
+    vel*=Math.pow(0.0016,dt);
+    still += (moving>0.06 ? -still*6*dt : dt/DWELL);
+    still = Math.max(0,Math.min(1,still));
+
+    const d=1-still;                     // dissolution
+    const bloom=Math.max(0,(still-0.92)/0.08);
+
+    // the breath — f₀ 1.2 Hz, the project's clock, felt not seen
+    const breath=Math.sin(now/1000*Math.PI*2*1.2);
+
+    letters.forEach((el,i)=>{
+      const r1=seed(i)-0.5, r2=seed(i+9)-0.5;
+      const dx=r1*90*d*d, dy=r2*46*d*d;
+      const rot=r1*26*d;
+      el.style.transform=`translate(${dx}px,${dy}px) rotate(${rot}deg) scale(${1+bloom*0.05})`;
+      el.style.opacity=(0.10+0.90*still).toFixed(3);
+      el.style.filter=`blur(${(d*d*7).toFixed(2)}px) brightness(${1+bloom*0.8+breath*0.03*still})`;
+    });
+
+    chars.forEach((el,i)=>{
+      const r=seed(i+31)-0.5;
+      el.style.transform=`translate(${r*30*d*d}px,${(seed(i+77)-0.5)*16*d*d}px)`;
+      el.style.opacity=(Math.max(0,still-0.35)/0.65*0.9).toFixed(3);
+      el.style.filter=`blur(${(d*3.4).toFixed(2)}px)`;
+    });
+
+    fill.style.width=(still*100).toFixed(1)+"%";
+    fill.style.background=bloom>0?"var(--am)":"var(--gr)";
+    state.textContent="stillness "+still.toFixed(2)+" · "+
+      (bloom>0?"free-run — the bloom":still>0.75?"resolving":still>0.3?"emerging":"dissolved");
+    state.style.color=bloom>0?"var(--am)":"var(--bd)";
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

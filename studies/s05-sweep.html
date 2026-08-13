@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>S-05 · sweep</title>
+<style>
+  :root{--bg:#05080c;--pn:#0a0f16;--ink:#e6edf3;--mu:#66707f;--bd:#222b38;
+        --am:#f0a94a;--bl:#5aa7e8;--gr:#4ade80;--co:#e05d3d;
+        --f:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--f);display:flex;flex-direction:column;overflow:hidden;
+       user-select:none;-webkit-user-select:none}
+  header,footer{padding:12px 18px;color:var(--mu);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;flex:none;display:flex;gap:14px}
+  header{border-bottom:1px solid var(--bd)} footer{border-top:1px solid var(--bd);text-transform:none;letter-spacing:0;font-size:11px}
+  main{flex:1;position:relative;min-height:0;cursor:ew-resize;touch-action:none}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+  .read{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);text-align:center;pointer-events:none}
+  .read .th{font-size:11px;color:var(--bd);letter-spacing:.16em}
+  .read .nm{font-size:clamp(15px,3vw,22px);letter-spacing:.2em;margin-top:5px;min-height:1.4em}
+  .hint{position:absolute;left:50%;top:18px;transform:translateX(-50%);font-size:10.5px;color:var(--bd);letter-spacing:.12em;pointer-events:none}
+</style>
+</head>
+<body>
+<header><b style="color:var(--ink);font-weight:400">S-05</b><span>sweep</span>
+  <span style="margin-left:auto;color:var(--bd)">no scroll — drag left and right; the destinations are angles</span></header>
+
+<main id="stage">
+  <canvas id="c"></canvas>
+  <div class="hint">drag anywhere · arrive at a station to open it</div>
+  <div class="read"><div class="th" id="th">θ = 0.0°</div><div class="nm" id="nm"></div></div>
+</main>
+
+<footer>
+  <span><b style="color:var(--mu)">one mechanism —</b> the only axis is θ. Destinations are not links in a row; they are positions you arrive at.</span>
+  <span style="margin-left:auto;color:var(--bd)">twist: navigation as an act of tuning, not of choosing</span>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  // Stations are laid across the sweep. Nothing is listed; you find them by
+  // travelling. Tolerance is tight enough that arrival feels like tuning a
+  // dial onto a carrier, not like clicking a menu.
+  const STATIONS=[
+    {m:0.06,label:"SOUNDCLOUD", col:"--am"},
+    {m:0.24,label:"YOUTUBE",    col:"--bl"},
+    {m:0.42,label:"INSTAGRAM",  col:"--gr"},
+    {m:0.50,label:"— the seam —",col:"--mu", rest:true},
+    {m:0.58,label:"TIKTOK",     col:"--gr"},
+    {m:0.76,label:"X",          col:"--bl"},
+    {m:0.94,label:"FACEBOOK",   col:"--am"},
+  ];
+  const TOL=0.028;
+
+  const cv=document.getElementById("c"), g=cv.getContext("2d");
+  const stage=document.getElementById("stage");
+  const thEl=document.getElementById("th"), nmEl=document.getElementById("nm");
+  const css=getComputedStyle(document.documentElement);
+  const C=n=>css.getPropertyValue(n).trim();
+
+  let W=0,H=0,DP=Math.min(2,devicePixelRatio||1);
+  function size(){ W=stage.clientWidth; H=stage.clientHeight;
+    cv.width=W*DP; cv.height=H*DP; g.setTransform(DP,0,0,DP,0,0); }
+  addEventListener("resize",size); size();
+
+  let m=0.5, vm=0, drag=false, lastX=0;
+  stage.addEventListener("pointerdown",e=>{drag=true;lastX=e.clientX;stage.setPointerCapture(e.pointerId);});
+  stage.addEventListener("pointerup",()=>drag=false);
+  stage.addEventListener("pointercancel",()=>drag=false);
+  stage.addEventListener("pointermove",e=>{
+    if(!drag)return; vm += (e.clientX-lastX)/Math.max(320,W)*-1.6; lastX=e.clientX;
+  });
+  addEventListener("keydown",e=>{
+    if(e.key==="ArrowLeft") vm-=0.02; if(e.key==="ArrowRight") vm+=0.02;
+  });
+
+  let t=0;
+  function frame(now){
+    t=now/1000;
+    // momentum, then the phosphor settle — the sweep coasts and lands
+    m=Math.max(0,Math.min(1,m+vm)); vm*=0.90;
+    if(Math.abs(vm)<1e-5) vm=0;
+
+    const theta=m*60-30;
+    g.clearRect(0,0,W,H);
+
+    // the datum
+    const y=H*0.5;
+    g.strokeStyle=C("--bd"); g.lineWidth=1;
+    g.beginPath(); g.moveTo(0,y+0.5); g.lineTo(W,y+0.5); g.stroke();
+
+    // stations, positioned by their distance from the current sweep
+    let here=null;
+    for(const s of STATIONS){
+      const d=s.m-m;
+      const x=W/2 + d*W*3.1;                     // the sweep magnifies proximity
+      if(x<-160||x>W+160) continue;
+      const near=Math.max(0,1-Math.abs(d)/(TOL*5));
+      const on=Math.abs(d)<=TOL;
+      if(on) here=s;
+
+      const col=C(s.col);
+      const h=14+near*40;
+      g.strokeStyle=col; g.globalAlpha=0.22+0.78*near; g.lineWidth=on?2.5:1;
+      g.beginPath(); g.moveTo(x,y-h); g.lineTo(x,y+h); g.stroke();
+
+      if(near>0.12){
+        g.globalAlpha=near*near;
+        g.fillStyle=col;
+        g.font=(10+near*5).toFixed(1)+"px "+css.getPropertyValue("--f");
+        g.textAlign="center";
+        g.fillText(s.label,x,y-h-12);
+      }
+      g.globalAlpha=1;
+    }
+
+    // the head — where you are. it breathes at f₀.
+    const br=1+Math.sin(t*Math.PI*2*1.2)*0.06;
+    g.fillStyle=here?C(here.col):C("--ink");
+    g.globalAlpha=here?1:0.5;
+    g.beginPath(); g.arc(W/2,y,(here?7:4.5)*br,0,7); g.fill();
+    g.globalAlpha=1;
+
+    thEl.textContent=`θ = ${theta>=0?"+":""}${theta.toFixed(1)}°`;
+    if(here){
+      nmEl.textContent=here.rest?"rest — the two worlds coincide":here.label;
+      nmEl.style.color=C(here.col);
+    }else{ nmEl.textContent=""; }
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>S-03 · boustrophedon</title>
+<style>
+  :root{--bg:#05080c;--pn:#0a0f16;--ink:#e6edf3;--mu:#66707f;--bd:#222b38;
+        --am:#f0a94a;--bl:#5aa7e8;--gr:#4ade80;--co:#e05d3d;
+        --f:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--f);display:flex;flex-direction:column;overflow:hidden}
+  header,footer{padding:12px 18px;color:var(--mu);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;flex:none;display:flex;gap:14px}
+  header{border-bottom:1px solid var(--bd)} footer{border-top:1px solid var(--bd);text-transform:none;letter-spacing:0;font-size:11px}
+  main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:16px;min-height:0}
+  #plough{width:min(760px,92vw);font-size:clamp(11px,1.9vw,15px);line-height:2.4}
+  .ln{display:block;white-space:pre;transform-origin:center center;will-change:transform}
+  .ln.ret{color:var(--mu)}
+  .datum{width:min(760px,92vw);height:1px;background:var(--bd);position:relative}
+  .ctl{width:min(760px,92vw);display:flex;align-items:center;gap:12px;font-size:10.5px;color:var(--mu)}
+  input[type=range]{flex:1;accent-color:var(--gr);height:3px}
+  .cap{font-size:10.5px;color:var(--bd);letter-spacing:.1em}
+</style>
+</head>
+<body>
+<header><b style="color:var(--ink);font-weight:400">S-03</b><span>boustrophedon</span>
+  <span style="margin-left:auto;color:var(--bd)">as the ox ploughs — the return pass writes mirrored</span></header>
+
+<main>
+  <div id="plough"></div>
+  <div class="datum"></div>
+  <div class="ctl"><span>−30°</span><input id="s" type="range" min="0" max="1" step="0.001" value="0"><span>+30°</span></div>
+  <div class="cap" id="state">θ = −30° · the forward face</div>
+</main>
+
+<footer>
+  <span><b style="color:var(--mu)">one mechanism —</b> alternate lines are written in the return direction, and the sweep decides how far the return has turned.</span>
+  <span style="margin-left:auto;color:var(--bd)">twist: the name's own etymology, as the page's typography</span>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  const TEXT=
+    "held for collection. the carrier did not come. written confirmation "+
+    "to follow. it did not. condition on leaving: as drawn. front panel "+
+    "only. no internals. never energized. the bay was swept twice and "+
+    "nothing was found to sweep. two documents agree. the item does not.";
+
+  const COLS=52;                     // the measure — a line's width in characters
+  const el=document.getElementById("plough");
+  const slider=document.getElementById("s"), state=document.getElementById("state");
+
+  // wrap on the measure, never mid-word
+  const lines=[]; let cur="";
+  for(const w of TEXT.split(" ")){
+    if((cur+" "+w).trim().length>COLS){ lines.push(cur.trim()); cur=w; } else cur+=" "+w;
+  }
+  if(cur.trim()) lines.push(cur.trim());
+
+  // Every second line is a RETURN pass: its characters are laid in reverse
+  // order, and the whole line is mirrored about the vertical. Read as one
+  // continuous furrow, the text never lifts — you turn at the end and come
+  // back, which is what boustrophedon means.
+  const rows=lines.map((t,i)=>{
+    const ret=i%2===1;
+    const d=document.createElement("span");
+    d.className="ln"+(ret?" ret":"");
+    d.textContent = ret ? [...t].reverse().join("") : t;
+    el.appendChild(d);
+    return {d,ret};
+  });
+
+  function draw(){
+    const m=parseFloat(slider.value);
+    const theta=m*60-30;
+    // The return lines rotate from fully mirrored (forward face) to upright
+    // (return face). At the seam they are edge-on — half a turn, unreadable
+    // by either world, which is exactly where the mark lives.
+    const turn=m;                                   // 0 → mirrored, 1 → upright
+    for(const r of rows){
+      if(!r.ret){ r.d.style.transform=`scaleX(${1-2*0})`; continue; }
+      const sx=-1+2*turn;                           // −1 … +1 through 0
+      r.d.style.transform=`scaleX(${sx.toFixed(4)})`;
+      // at the crossing the glyphs are edge-on: fade what cannot be read
+      const edge=1-Math.abs(sx);
+      r.d.style.opacity=(1-edge*0.86).toFixed(3);
+    }
+    state.textContent=`θ = ${theta>=0?"+":""}${theta.toFixed(0)}° · `+
+      (m<0.05?"the forward face — the return runs mirrored"
+       :m>0.95?"the return face — the return runs upright, the forward pass reads on"
+       :Math.abs(m-0.5)<0.04?"the seam — the return is edge-on, legible to neither world"
+       :"crossing");
+    state.style.color=Math.abs(m-0.5)<0.04?"var(--gr)":"var(--bd)";
+  }
+  slider.addEventListener("input",draw);
+  draw();
+})();
+</script>
+</body>
+</html>
