@@ -161,25 +161,28 @@ function cross(x,y,r,col,a){ln([x-r,y],[x+r,y],col,.45,a);ln([x,y-r],[x,y+r],col
 function txt(x,y,s,col,px,al){d.fillStyle=col;d.globalAlpha=1;d.font=px*S+'px '+MONO;d.textAlign=al||'center';d.textBaseline='middle';d.fillText(s,X(x),X(y));}
 [[26,30],[354,30],[26,212],[354,212]].forEach(function(q){cross(q[0],q[1],4,MUT,.6);});
 ln([166,28],[166,41],MUT,.45,.75);ln([190,28],[190,41],MUT,.45,.75);ln([166,34],[190,34],MUT,.45,.85);
-arrow(166,34,1,MUT,.85);arrow(190,34,-1,MUT,.85);txt(203,34,'Δ24',MUT,9,'left');
-chain([166,44],[166,206],GREEN,.55,.7);txt(160,46,'σ',GREEN,9,'right');
+arrow(166,34,1,MUT,.85);arrow(190,34,-1,MUT,.85);txt(203,34,'Δ24',MUT,7.5,'left');
+chain([166,44],[166,206],GREEN,.55,.7);txt(160,46,'σ',GREEN,7.5,'right');
 chain([190,44],[190,206],MUT,.4,.24);
-[[70,'+',AMBER],[117,'−',BLUE],[166,'0',GREEN],[215,'0',GREEN],[262,'−',BLUE],[313,'+',AMBER]].forEach(function(t){txt(t[0],56,t[1],t[2],12);});
-[[20,'0'],[133,'1'],[247,'2'],[360,'10']].forEach(function(t){ln([t[0],SEAM/S-6],[t[0],SEAM/S],MUT,.5,.85);txt(t[0],SEAM/S-9.5,t[1],MUT,7.5);});
+[[70,'+',AMBER],[117,'−',BLUE],[166,'0',GREEN],[215,'0',GREEN],[262,'−',BLUE],[313,'+',AMBER]].forEach(function(t){txt(t[0],56,t[1],t[2],9);});
+// the datum carries the sweep's own measure — 0 at the forward end, 1 at the
+// return end. The two inner majors keep their ticks and go unlabelled.
+[20,133,247,360].forEach(function(x){ln([x,SEAM/S-6],[x,SEAM/S],MUT,.5,.85);});
+txt(20,SEAM/S-9,'0',MUT,7);txt(360,SEAM/S-9,'1',MUT,7);
 [58,96,171,209,285,322].forEach(function(x){ln([x,SEAM/S-3],[x,SEAM/S],MUT,.45,.6);});
 d.globalAlpha=.38;d.strokeStyle=BLUE;d.setLineDash([3,4]);d.lineWidth=.6*S;d.beginPath();d.arc(X(262),X(108),X(24),0,7);d.stroke();d.beginPath();d.arc(X(262),X(172),X(24),0,7);d.stroke();d.setLineDash([]);d.globalAlpha=1;
 // the symmetry groups and the wavelength — centred on the sheet, stacked.
 // The group row is two colours (D∞ carries the muted run, C₁ the R's amber),
 // so it is measured as one line and laid out from a centred origin.
 (function(){var A='σᵥ σₕ σᵥ σₕ D∞',B='C₁',GAP=5,CX=190;
- d.font=12*S+'px '+MONO;
+ d.font=8.5*S+'px '+MONO;
  var wA=d.measureText(A).width/S,wB=d.measureText(B).width/S,x0=CX-(wA+GAP+wB)/2;
- txt(x0,219,A,MUT,12,'left');txt(x0+wA+GAP,219,B,AMBER,12,'left');
- txt(CX,237,'w = h/φ · λ = 530 ± 60 nm',MUT,12);})();
+ txt(x0,220,A,MUT,8.5,'left');txt(x0+wA+GAP,220,B,AMBER,8.5,'left');
+ txt(CX,234,'w = h/φ · λ = 530 ± 60 nm',MUT,8.5);})();
 // title block
 ln([20,248],[360,248],MUT,.5,.78);ln([20,262],[360,262],MUT,.5,.78);ln([20,248],[20,262],MUT,.5,.78);ln([360,248],[360,262],MUT,.5,.78);
 [128,214,300].forEach(function(xv){ln([xv,248],[xv,262],MUT,.45,.6);});
-txt(74,255,'MET∃OR',MUT,7.5);txt(171,255,'THE GRAMMAR',MUT,7.5);txt(257,255,'REV 1.3.1',MUT,7.5);txt(330,255,'f₀ 1.2 Hz',MUT,7.5);
+txt(74,255,'MET∃OR',MUT,7);txt(171,255,'THE GRAMMAR',MUT,7);txt(257,255,'REV 1.3.1',MUT,7);txt(330,255,'f₀ 1.2 Hz',MUT,7);
 })();
 // audio
 var ctx=null,V=null,an=null,td=null,son=false,fr0=[231.1,290.1,257.2,257.2,290.1,231.1],pans=[-.85,-.5,-.15,.15,.5,.85],BASE=.055,lastCol=0;
