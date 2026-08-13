@@ -3,10 +3,9 @@
 The public page people land on. Not a Linktree: the hero is the live engine
 itself — the sweep is playable — and the links sit under it.
 
-This is a **separate repo from the workbench** on purpose. The workbench
-(`../met3or`) carries the cipher, the lore, and the ARG payload; this repo is
-public because GitHub Pages needs it to be. Nothing in here should reveal
-anything you don't want indexed.
+This is a **separate repo from the workbench** on purpose — the workbench is
+private, and this repo is public because GitHub Pages needs it to be. Nothing
+lands in here that you don't want indexed.
 
 ```
 index.html        the page — layout, the links renderer, the frame sizing
