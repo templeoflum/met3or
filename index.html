@@ -50,9 +50,22 @@
     width:clamp(18px,4.1vw,22px); height:auto; display:block;
     fill:currentColor; stroke:none;
   }
+
+  /* the sound toggle — a control, so it sits apart from the links */
+  #snd{
+    position:fixed; top:14px; right:14px; z-index:2;
+    background:none; border:0; padding:6px; cursor:pointer; line-height:0;
+    color:var(--mu); transition:color .15s ease;
+  }
+  #snd:hover,#snd:focus-visible{color:var(--gr); outline:none}
+  #snd svg{width:19px;height:19px;display:block}
+  #snd .body{fill:currentColor}
+  #snd .wave{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round}
 </style>
 </head>
 <body>
+
+  <button id="snd" type="button" aria-pressed="false" aria-label="Sound" title="sound"></button>
 
   <iframe id="engine" src="engine.html?v=c537c607" title="MET∃OR" scrolling="no"></iframe>
 
@@ -132,6 +145,71 @@
     }catch(e){ /* file:// blocks this; the CSS height stands */ }
   }
 
+  // ── rest is the seam ──────────────────────────────────────────────────
+  // CANON: rest is m 0.5 — θ 0, where the two worlds coincide and the colours
+  // break free of the letters. The engine's slider ships at 0 (the forward
+  // face), so open it at the seam over contract A rather than by touching its
+  // DOM: {set:1, m} is the sanctioned channel.
+  var SEAM = 0.5;
+  function toSeam(){
+    try{ frame.contentWindow.postMessage({ set:1, m:SEAM }, "*"); }catch(e){}
+  }
+
+  // ── sound ─────────────────────────────────────────────────────────────
+  // The engine owns the audio graph behind its own #snd button, which builds
+  // the AudioContext on first click and resumes it if suspended. Autoplay
+  // policy means no page can start audio unprompted, so we arm it on the
+  // first real gesture anywhere — a click, a key, a drag of the sweep — and
+  // this toggle turns it back off. We drive the engine's own button so the
+  // audio graph stays entirely the engine's business.
+  var sndBtn = document.getElementById("snd");
+  var on = false, armed = false;
+
+  var SPK = '<path class="body" d="M3 9.5v5h3.6L11 18V6L6.6 9.5H3z"/>';
+  var ICON = {
+    on:  '<svg viewBox="0 0 24 24" aria-hidden="true">' + SPK +
+         '<path class="wave" d="M14.6 9.2a4 4 0 0 1 0 5.6"/>' +
+         '<path class="wave" d="M17.4 6.6a7.8 7.8 0 0 1 0 10.8"/></svg>',
+    off: '<svg viewBox="0 0 24 24" aria-hidden="true">' + SPK +
+         '<path class="wave" d="M15 9.6l5 4.8"/><path class="wave" d="M20 9.6l-5 4.8"/></svg>'
+  };
+
+  function paint(){
+    sndBtn.innerHTML = on ? ICON.on : ICON.off;
+    sndBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    sndBtn.title = on ? "sound on" : "sound off";
+  }
+
+  // Click the engine's own toggle. Called synchronously inside a user gesture
+  // so the activation carries into the same-origin frame and the context is
+  // allowed to start.
+  function engineToggle(){
+    try{
+      var d = frame.contentDocument;
+      var b = d && d.getElementById("snd");
+      if(!b) return false;
+      b.click();
+      return true;
+    }catch(e){ return false; }
+  }
+
+  sndBtn.addEventListener("click", function(){
+    armed = true;                       // an explicit click is its own arming
+    if(engineToggle()){ on = !on; paint(); }
+  });
+
+  // First gesture anywhere arms the sound, so it is on by the time the sweep
+  // is touched. Once only, and never fighting an explicit toggle.
+  function arm(e){
+    if(armed || on) return;
+    if(e && sndBtn.contains(e.target)) return;   // the button speaks for itself
+    armed = true;
+    if(engineToggle()){ on = true; paint(); }
+  }
+  ["pointerdown","keydown","touchstart"].forEach(function(t){
+    window.addEventListener(t, arm, { once:false, passive:true });
+  });
+
   frame.addEventListener("load", function(){
     try{
       var d = frame.contentDocument;
@@ -142,12 +220,16 @@
         if(typeof ResizeObserver === "function" && d.body){
           new ResizeObserver(fit).observe(d.body);
         }
+        // a gesture inside the frame (dragging the sweep) arms it too
+        d.addEventListener("pointerdown", function(){ arm(null); }, { passive:true });
       }
     }catch(e){}
+    toSeam();
     fit();
     frame.classList.add("ready");
   });
 
+  paint();
   window.addEventListener("resize", fit);
 })();
 </script>
