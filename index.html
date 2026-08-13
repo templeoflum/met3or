@@ -51,14 +51,15 @@
     fill:currentColor; stroke:none;
   }
 
-  /* the sound toggle — a control, so it sits apart from the links */
+  /* the sound toggle — in the flow, centred, above the mark */
   #snd{
-    position:fixed; top:14px; right:14px; z-index:2;
-    background:none; border:0; padding:6px; cursor:pointer; line-height:0;
-    color:var(--mu); transition:color .15s ease;
+    background:none; border:0; padding:8px; cursor:pointer; line-height:0;
+    color:var(--mu); transition:color .15s ease, transform .15s ease;
   }
-  #snd:hover,#snd:focus-visible{color:var(--gr); outline:none}
-  #snd svg{width:19px;height:19px;display:block}
+  #snd:hover,#snd:focus-visible{color:var(--ink); transform:translateY(-1px); outline:none}
+  #snd.on{color:var(--gr)}
+  #snd.on:hover{color:var(--gr)}
+  #snd svg{width:clamp(26px,6vw,32px);height:auto;display:block}
   #snd .body{fill:currentColor}
   #snd .wave{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round}
 </style>
@@ -177,6 +178,7 @@
   function paint(){
     sndBtn.innerHTML = on ? ICON.on : ICON.off;
     sndBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    sndBtn.classList.toggle("on", on);      // green when it is actually sounding
     sndBtn.title = on ? "sound on" : "sound off";
   }
 
