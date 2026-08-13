@@ -4,207 +4,118 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MET∃OR</title>
-<meta name="description" content="MET∃OR — a grammar, not a logo. Ser. 0006, calibrated 1988, whereabouts unknown.">
 
-<!-- Social preview. Drop a 1200×630 png at og.png to light this up. -->
 <meta property="og:title" content="MET∃OR">
-<meta property="og:description" content="the reflection first. the surface second. the seam between.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="og.png">
 <meta name="twitter:card" content="summary_large_image">
 
 <style>
-  /* canon palette — brand/docs, canon.identity */
   :root{
-    --bg:#05080c; --panel:#0a0f16; --ink:#e6edf3; --mu:#66707f;
-    --bd:#222b38; --am:#f0a94a; --bl:#5aa7e8; --gr:#4ade80; --co:#e05d3d;
+    --bg:#05080c; --panel:#0a0f16; --ink:#e6edf3; --mu:#66707f; --bd:#222b38;
+    --am:#f0a94a; --bl:#5aa7e8; --gr:#4ade80;
     --font:"SF Mono",ui-monospace,"DejaVu Sans Mono",Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html{-webkit-text-size-adjust:100%}
+  html,body{height:100%}
   body{
     background:var(--bg); color:var(--ink); font-family:var(--font);
-    font-size:14px; line-height:1.5; padding:34px 16px 56px;
-    display:flex; flex-direction:column; align-items:center; gap:26px;
-  }
-  .col{width:100%; max-width:820px}
-
-  /* ── the wordmark ── the colour palindrome + − 0 0 − + over the letters ── */
-  h1{
-    font-size:clamp(30px,8.5vw,54px); font-weight:400; letter-spacing:.18em;
-    text-align:center; line-height:1.1;
-  }
-  h1 span{display:inline-block}
-  .s-plus {color:var(--am)}   /* +1 · 590 nm */
-  .s-minus{color:var(--bl)}   /* −1 · 470 nm */
-  .s-zero {color:var(--gr)}   /*  0 · 530 nm */
-
-  .bio{color:var(--mu); text-align:center; font-size:12.5px; margin-top:12px}
-  .palindrome{
-    color:var(--bd); text-align:center; font-size:11px;
-    letter-spacing:.5em; margin-top:8px; user-select:none;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:22px; padding:20px;
   }
 
-  /* ── the engine ── */
-  .engine{
-    width:100%; border:1px solid var(--bd); border-radius:14px;
-    overflow:hidden; background:var(--bg);
+  /* the mark */
+  #engine{
+    display:block; width:100%; max-width:820px; height:520px; border:0;
+    opacity:0; transition:opacity .25s ease;
   }
-  .engine iframe{
-    display:block; width:100%; height:760px; border:0;
-    transition:height .18s ease;
-  }
-  .caption{
-    color:var(--mu); font-size:11px; text-align:center; margin-top:10px;
-  }
-  .caption b{color:var(--gr); font-weight:400}
+  #engine.ready{opacity:1}
 
-  /* ── the links ── */
-  .links{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:9px}
-  a.link{
-    display:flex; align-items:center; gap:12px; text-decoration:none;
-    border:1px solid var(--bd); border-radius:10px; padding:13px 15px;
-    background:var(--panel); color:var(--ink);
-    transition:border-color .15s, transform .15s, background .15s;
+  /* links — render only when links.js has a url. nothing otherwise. */
+  nav{
+    width:100%; max-width:820px;
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:8px;
   }
-  a.link:hover{border-color:currentColor; transform:translateY(-1px)}
-  a.link:focus-visible{outline:2px solid var(--gr); outline-offset:2px}
-  .trit{
-    flex:none; width:20px; text-align:center; font-size:15px; opacity:.9;
+  nav:empty{display:none}
+  a{
+    display:flex; align-items:center; gap:10px; text-decoration:none;
+    border:1px solid var(--bd); border-radius:9px; padding:11px 14px;
+    background:var(--panel); color:var(--ink); font-size:13px;
+    transition:border-color .15s, transform .15s;
   }
-  .label{flex:1; min-width:0; font-size:14px}
-  .handle{color:var(--mu); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  .arrow{flex:none; color:var(--mu); font-size:12px}
-
-  .holding{
-    border:1px dashed var(--bd); border-radius:10px; padding:22px;
-    text-align:center; color:var(--mu); font-size:12.5px;
-  }
-
-  footer{
-    color:var(--mu); font-size:11px; text-align:center;
-    border-top:1px solid var(--bd); padding-top:18px; line-height:1.9;
-  }
-  footer .dim{color:var(--bd)}
+  a:hover{border-color:currentColor; transform:translateY(-1px)}
+  a:focus-visible{outline:2px solid var(--gr); outline-offset:2px}
+  .t{flex:none; width:14px; text-align:center}
+  .p{color:var(--am)} .m{color:var(--bl)} .z{color:var(--gr)}
 </style>
 </head>
 <body>
 
-  <header class="col">
-    <!-- M E T ∃ O R  ·  signs + − 0 0 − +  ·  a palindrome -->
-    <h1>
-      <span class="s-plus">M</span><span class="s-minus">E</span><span class="s-zero">T</span><span class="s-zero">∃</span><span class="s-minus">O</span><span class="s-plus">R</span>
-    </h1>
-    <p class="palindrome">+−00−+</p>
-    <p class="bio" id="bio"></p>
-  </header>
+  <iframe id="engine" src="engine.html" title="MET∃OR" scrolling="no"></iframe>
 
-  <main class="col">
-    <div class="engine">
-      <!-- The engine is the only author of the mark. This is a byte-identical
-           copy of met3or_engine.html from the workbench — resync with sync-engine.sh,
-           never hand-edit it here. -->
-      <iframe id="engine" src="engine.html" title="MET∃OR — the living wordmark engine"
-              loading="lazy" scrolling="no"></iframe>
-    </div>
-    <p class="caption">
-      drag the sweep — <b>θ = m·60 − 30</b>. the word resolves only at the faces;
-      rest is the seam, where the colours break free of the letters.
-    </p>
-  </main>
-
-  <nav class="col links" id="links" aria-label="Listen and follow"></nav>
-
-  <footer class="col">
-    no canonical pronunciation · λ = 530 ± 60 nm<br>
-    escaped 1988 — Boustrophedon Instrument Co.<br>
-    <span class="dim">Ser. 0006 · whereabouts unknown</span>
-  </footer>
+  <nav id="links" aria-label="Listen"></nav>
 
 <script src="links.js"></script>
 <script>
 (function(){
   "use strict";
 
-  // ── the line under the wordmark ──────────────────────────────────────
-  var bio = document.getElementById("bio");
-  if (typeof BIO === "string" && BIO) bio.textContent = BIO;
-
-  // ── the links ────────────────────────────────────────────────────────
-  var SIGN_CLASS = { "+":"s-plus", "−":"s-minus", "-":"s-minus", "0":"s-zero" };
+  // ── links ── nothing renders unless a url is filled in ────────────────
+  var CLS = { "+":"p", "−":"m", "-":"m", "0":"z" };
   var nav = document.getElementById("links");
-  var live = (typeof LINKS !== "undefined" ? LINKS : []).filter(function(l){
-    return l && typeof l.url === "string" && l.url.trim() !== "";
-  });
-
-  if (!live.length) {
-    var hold = document.createElement("div");
-    hold.className = "holding";
-    hold.textContent = (typeof HOLDING === "string" && HOLDING) ? HOLDING : "contact pending.";
-    nav.appendChild(hold);
-  } else {
-    live.forEach(function(l){
+  (typeof LINKS !== "undefined" ? LINKS : [])
+    .filter(function(l){ return l && typeof l.url === "string" && l.url.trim(); })
+    .forEach(function(l){
       var a = document.createElement("a");
-      a.className = "link";
-      a.href = l.url;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-
+      a.href = l.url; a.target = "_blank"; a.rel = "noopener noreferrer";
       var t = document.createElement("span");
-      t.className = "trit " + (SIGN_CLASS[l.sign] || "s-zero");
+      t.className = "t " + (CLS[l.sign] || "z");
       t.textContent = l.sign || "0";
-      t.setAttribute("aria-hidden", "true");
-
-      var lab = document.createElement("span");
-      lab.className = "label";
-      lab.textContent = l.label;
-      if (l.handle) {
-        var h = document.createElement("span");
-        h.className = "handle";
-        h.textContent = " · " + l.handle;
-        lab.appendChild(h);
-      }
-
-      var arw = document.createElement("span");
-      arw.className = "arrow";
-      arw.textContent = "↗";
-      arw.setAttribute("aria-hidden", "true");
-
-      a.appendChild(t); a.appendChild(lab); a.appendChild(arw);
+      t.setAttribute("aria-hidden","true");
+      var s = document.createElement("span");
+      s.textContent = l.label;
+      a.appendChild(t); a.appendChild(s);
       nav.appendChild(a);
     });
-  }
 
-  // ── size the engine frame to its content ─────────────────────────────
-  // The engine sets min-height:100% on html/body/#wrap, which would ratchet
-  // upward if we measured it directly. We neutralise that inside the frame
-  // (same origin, so this is allowed) and then track the real content box.
+  // ── the frame ─────────────────────────────────────────────────────────
+  // engine.html is a byte-identical copy of the workbench engine and is never
+  // edited here. Everything but the mark and its sweep is hidden from the
+  // outside, same-origin, so a resync can't undo it:
+  //   #telC  telemetry pane      #scoC  oscilloscope pane
+  //   .row   status line + config/drift/sound     #cfg  config board
+  //   .foot  the render notes    .lbl  the ±30° captions
+  var HIDE = "#telC,#scoC,.row,#cfg,.foot,.ctl .lbl{display:none!important}" +
+             "html,body{min-height:0!important;background:transparent!important}" +
+             "#wrap{min-height:0!important;padding:0!important;gap:14px!important}" +
+             "canvas{width:100%!important;max-width:none!important}" +
+             ".ctl{width:100%!important}";
+
   var frame = document.getElementById("engine");
 
   function fit(){
-    try {
+    try{
       var d = frame.contentDocument;
-      if (!d || !d.documentElement) return;      // cross-origin or not ready
+      if(!d || !d.documentElement) return;
       var h = d.documentElement.scrollHeight;
-      if (h > 80) frame.style.height = h + "px"; // ignore transient collapse
-    } catch (e) {
-      /* file:// in some browsers blocks this — the CSS height stands. */
-    }
+      if(h > 80) frame.style.height = h + "px";
+    }catch(e){ /* file:// blocks this; the CSS height stands */ }
   }
 
   frame.addEventListener("load", function(){
-    try {
+    try{
       var d = frame.contentDocument;
-      if (!d) return;
-      var st = d.createElement("style");
-      st.textContent = "html,body{min-height:0!important}#wrap{min-height:0!important}";
-      d.head.appendChild(st);
-
-      if (typeof ResizeObserver === "function" && d.body) {
-        new ResizeObserver(fit).observe(d.body);
+      if(d){
+        var st = d.createElement("style");
+        st.textContent = HIDE;
+        d.head.appendChild(st);
+        if(typeof ResizeObserver === "function" && d.body){
+          new ResizeObserver(fit).observe(d.body);
+        }
       }
-    } catch (e) {}
+    }catch(e){}
     fit();
+    frame.classList.add("ready");
   });
 
   window.addEventListener("resize", fit);
