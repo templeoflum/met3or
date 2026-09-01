@@ -45,7 +45,10 @@
 </div>
 <script>
 (function(){
-var S=4.0,CW=380*S,CH=264*S,SEAM=140*S,DP=2;  // capture-grade sheet: figure ≥2× any placement; display CSS-capped
+// capture-grade sheet by default: figure ≥2× any placement; display CSS-capped.
+// A host may ask for the scale it will place at (?S=1&DP=1) — the reel does.
+var _Q=new URLSearchParams(location.search);
+var S=parseFloat(_Q.get('S'))||4.0,CW=380*S,CH=264*S,SEAM=140*S,DP=parseFloat(_Q.get('DP'))||2;
 // Canvas parses ctx.font with the CSS font shorthand grammar, which does NOT
 // substitute var() — 'Npx var(--font-mono)' fails to parse, the assignment is
 // dropped, and the context keeps its default 10px sans-serif. Every label on
@@ -132,6 +135,10 @@ var HOME=JSON.parse(JSON.stringify(CFG));
 var STA=[0,.15,.3,.42,.5,.58,.7,.85,1];   // the stations (states.json)
 var GEO={rs:1,wx:1,breath:1};             // geometry knobs — moving one re-strikes the phosphor
 var WIPEP=false;
+// reel contract: when a host drives the engine, the wall clock and rAF stand
+// down and every random draw comes from the host's seed. See reel/ARCHITECTURE.md.
+var DRIVEN=false,RNG=Math.random;
+var MASK=null,DOC=true,BGF=true;   // BGF=false: no ground — a host compositing a view wants the figure alone   // reel contract: MASK = {li:true} keeps only those letters under the beam; DOC=false hides the document layer
 function applyCfg(patch){for(var k in patch){if(GEO[k]&&CFG[k]!==patch[k])WIPEP=true;CFG[k]=patch[k];}}
 function circle(cx,cy,r,n){var q=[];for(var i=0;i<=n;i++){var a=-Math.PI/2+i/n*2*Math.PI;q.push([cx+r*Math.cos(a),cy+r*Math.sin(a)]);}return q;}
 // letterform canon (design units, sheet is 380x264 pre-scale). h = hue home for phosphor.
@@ -204,8 +211,8 @@ function ease(u){return u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;}
 function ss(u){u=Math.max(0,Math.min(1,u));return u*u*(3-2*u);}
 function nz(i){var x=Math.sin(i*127.1+Math.floor(T*7)*311.7)*43758.5453;return x-Math.floor(x);}
 function hsl(h,s2,l){h=(h%360+360)%360;s2/=100;l/=100;var a=s2*Math.min(l,1-l);function f(n){var k=(n+h/30)%12;return l-a*Math.max(-1,Math.min(k-3,Math.min(9-k,1)));}return 'rgb('+[f(0),f(8),f(4)].map(function(v){return Math.round(v*255);}).join(',')+')';}
-function tf(m){
-T+=1/60;
+function tf(m,dt){
+T+=(dt||1/60);
 if(drifting){phase+=2*Math.PI/(40*60);s.value=0.5+0.5*Math.sin(phase);}
 var mm=parseFloat(s.value);
 if(Math.abs(mm-0.5)<0.01)dwell+=1/60;else dwell=0;
@@ -216,7 +223,7 @@ var hueG=Math.exp(-Math.pow((mm-.5)/CFG.gate,2));
 var tv=CFG.fvel*Math.pow(2,n)*(.6+.8*A);VEL+=(tv-VEL)*.06;HUE=(HUE+VEL*hueG)%360;
 var lumF=1.2*Math.pow(2,Math.min(Math.max(n,0),1)),strobe=.5+.5*Math.sin(2*Math.PI*lumF*T);
 var col=0;
-if(hueG>.6&&T>ncol){colT=T;cHold=.3+Math.random()*.25;ncol=T+REV*(6+Math.floor(Math.random()*8));}
+if(hueG>.6&&T>ncol){colT=T;cHold=.3+RNG()*.25;ncol=T+REV*(6+Math.floor(RNG()*8));}
 var ct=T-colT,ctot=.15+cHold+.2;
 if(ct>=0&&ct<ctot){if(ct<.15)col=ease(ct/.15);else if(ct<.15+cHold)col=1;else col=1-ease((ct-.15-cHold)/.2);}
 var sweep=1-.91*col;
@@ -241,6 +248,7 @@ function flushRun(){if(RUN.length<2||RUNL===null){return;}
  p.beginPath();p.moveTo(RUN[0][0],RUN[0][1]);for(var i=1;i<RUN.length;i++)p.lineTo(RUN[i][0],RUN[i][1]);p.stroke();
  p.globalAlpha=1;var tail=RUN[RUN.length-1];RUN.length=0;RUN.push(tail);}
 for(var st=0;st<steps;st++){idx=(idx+1)%NP;var q=PATH[idx],L=LET[q.li];var xy=xf(q,L);bx=xy[0];by=xy[1];
+ if(MASK&&!MASK[q.li]){flushRun();RUN.length=0;RUNL=null;pen=false;continue;}
  if(!q.pen){flushRun();RUN.length=0;RUN.push([bx,by]);RUNL=q.li;pen=false;continue;}
  RUN.push([bx,by]);pen=true;}
 flushRun();
@@ -258,39 +266,42 @@ ictx.clearRect(0,0,CW,CH);ictx.drawImage(wpc,0,0,CW,CH);nctx.clearRect(0,0,CW,CH
 for(var i=0;i<19;i++){var xi=i*20+10,di=Math.abs(xi-166)/214,oi=ss(mm*(1+SG)-di*SG),tp=oi*20;
 if(tp>.05){var x0=Math.round(i*20*S),x1=Math.round((i*20+tp)*S);if(x1>x0){
 [[ictx,wpc],[nctx,dc]].forEach(function(pr){var g=pr[0],src=pr[1];g.clearRect(x0,0,x1-x0,CH);g.save();g.beginPath();g.rect(x0,0,x1-x0,CH);g.clip();g.translate(CW,0);g.scale(-1,1);g.drawImage(src,0,0,CW,CH);g.restore();});}}}
-c.fillStyle='#0a0f16';c.fillRect(0,0,CW,CH);
+if(BGF){c.fillStyle='#0a0f16';c.fillRect(0,0,CW,CH);}else c.clearRect(0,0,CW,CH);
 var dA=Math.max(.3,1-sharp*.7*(1-strobe*Aeff));
-c.save();c.globalAlpha=dA;c.drawImage(nc,0,0,CW,CH);c.restore();
+if(DOC){c.save();c.globalAlpha=dA;c.drawImage(nc,0,0,CW,CH);c.restore();}
 c.drawImage(ic,0,0,CW,CH);
 // datum line (drafted, hairline)
 var yS=Math.round(SEAM),wS=Math.max(1,Math.round((.5+.35*sharp)*S));c.globalAlpha=.62+.28*soft*Aeff;c.strokeStyle=MUT;c.lineWidth=wS;
 c.beginPath();c.moveTo(20*S,yS);c.lineTo(360*S,yS);c.stroke();c.globalAlpha=1;
 // contact event(s): one per horizon crossing, weighted by ink share
-if(T>nb&&blinkQ.length===0){blinkQ.push(T);if(Math.random()<.18)blinkQ.push(T+.34);nb=T+(2.2+Math.random()*3.8)/CFG.blink;}
+if(T>nb&&blinkQ.length===0){blinkQ.push(T);if(RNG()<.18)blinkQ.push(T+.34);nb=T+(2.2+RNG()*3.8)/CFG.blink;}
 var occl=false;for(var bi=blinkQ.length-1;bi>=0;bi--){var bt=T-blinkQ[bi];if(bt>.32){blinkQ.splice(bi,1);continue;}if(bt>=0&&bt<.2)occl=true;}
 // the vesica is generated, never drawn: the O and its return in EXACT
 // reflection about the datum make the eye there — and only there. The
 // seat moved at all, the symmetry is broken and there is no eye.
 var OCX=262+CFG.wx,OCY=124,RCY=2*(SEAM/S)+CFG.rs-124,RR=24,DTM=SEAM/S;
-if(Math.abs(DTM-OCY)<RR&&Math.abs(RCY+OCY-2*DTM)<.5){
+if(Math.abs(DTM-OCY)<RR&&Math.abs(RCY+OCY-2*DTM)<.5&&!(MASK&&!MASK[4])){
 [[OCX,1-mm],[380-OCX,mm]].forEach(function(pr){var exl=pr[0],share=pr[1],av=ss(Math.min(1,share*2));if(av<.02)return;
-var ex=exl*S;c.globalAlpha=av;c.strokeStyle='rgba(90,167,232,'+(.42+.30*soft*Aeff)+')';c.lineWidth=2*S;
-c.beginPath();c.arc(ex,OCY*S,RR*S,0,7);c.stroke();
-c.globalAlpha=av*.6;c.beginPath();c.arc(ex,RCY*S,RR*S,0,7);c.stroke();c.globalAlpha=av;
+// only the pupil is drawn. The rings were an overlay — not struck by the
+// beam — and they broke the lenticular shift; the O itself is the iris.
+var ex=exl*S;c.globalAlpha=av;
 if(!occl){c.fillStyle=INK;c.beginPath();c.arc(ex,SEAM,5*S,0,7);c.fill();}c.globalAlpha=1;});
 }
 // beam core (event tier)
 if(pen){var coreA=sharp*.18+col*.85;if(coreA>.03){c.fillStyle='rgba(255,255,255,'+(coreA*.26)+')';c.beginPath();c.arc(bx,by,5.5*CFG.beam*S,0,7);c.fill();c.fillStyle='rgba(255,255,255,'+coreA+')';c.beginPath();c.arc(bx,by,1.9*CFG.beam*S,0,7);c.fill();}}
+// analog scanlines · roll bar · flash — the sheet's own post; a host compositing a view applies its own
+if(BGF){
 // analog scanlines
 var sBase=.008+.045*soft+.06*sharp,sp=3.4;   // the raster is fixed structure — scanlines do not drift
 for(var y=-sp+scan;y<CH/S;y+=sp){var li3=Math.floor(y/sp),a3=sBase*(.55+.75*nz(li3));if(nz(li3+999)<.05)continue;c.fillStyle='rgba(0,0,0,'+a3.toFixed(3)+')';c.fillRect(0,y*S,CW,1*S);}
 var by2=(T*11.3*S)%(CH+90*S)-45*S;c.fillStyle='rgba(230,237,243,'+(.006+.012*soft+.014*sharp)+')';c.fillRect(0,by2,CW,22*S);
 c.fillStyle='rgba(0,0,0,'+(.008+.016*soft+.016*sharp)+')';c.fillRect(0,by2+22*S,CW,10*S);
-if(soft>.05){var fl=(Math.random()-.5)*.016*sharp;if(fl!==0){c.fillStyle=fl>0?'rgba(255,255,255,'+fl+')':'rgba(0,0,0,'+(-fl)+')';c.fillRect(0,0,CW,CH);}}
+if(soft>.05){var fl=(RNG()-.5)*.016*sharp;if(fl!==0){c.fillStyle=fl>0?'rgba(255,255,255,'+fl+')':'rgba(0,0,0,'+(-fl)+')';c.fillRect(0,0,CW,CH);}}
+}
 var deg=Math.round(mm*60-30),state=hueG>.35?'pure signal · full tilt':(mm<.3?'the grammar · the forward face':(mm>.7?'the grammar · the return face':'crossing'));
 out.textContent='θ = '+(deg>0?'+':'')+deg+'° · '+state;
 FI++;telPane(TELG,{m:mm,soft:soft,sharp:sharp,hueG:hueG,n:n,A:A,t:T,dwell:dwell,frun:frun,idx:idx,np:NP,li:PATH[idx].li,fi:FI});scopePane(SCOG,T,mm,col,ENVQ);
-requestAnimationFrame(tf);}
+if(!DRIVEN)requestAnimationFrame(tf);}
 
 // ---- layer capture: the figure as tiers with alpha (ink / datum / events) ----
 (function(){
@@ -322,9 +333,7 @@ requestAnimationFrame(tf);}
     if(Math.abs(sd-OCY)<RR&&Math.abs(RCY+OCY-2*sd)<.5){
     [[OCX,1-st.mm],[380-OCX,st.mm]].forEach(function(pr){
       var exl=pr[0],share=pr[1],av=ss(Math.min(1,share*2));if(av<.02)return;
-      var ex=exl*S;g.globalAlpha=av;g.strokeStyle='rgba(90,167,232,'+(.42+.30*st.soft*st.Aeff)+')';g.lineWidth=2*S;
-      g.beginPath();g.arc(ex,OCY*S,RR*S,0,7);g.stroke();
-      g.globalAlpha=av*.6;g.beginPath();g.arc(ex,RCY*S,RR*S,0,7);g.stroke();g.globalAlpha=av;
+      var ex=exl*S;g.globalAlpha=av;   // pupil only — see the live path
       g.fillStyle=INK;g.beginPath();g.arc(ex,SEAM,5*S,0,7);g.fill();
       g.globalAlpha=1;});
     }
@@ -365,7 +374,17 @@ requestAnimationFrame(tf);}
  window.syncCfg=function(){for(var k in SY)SY[k]();tsync();};
  cfgb.addEventListener('click',function(){var on=cfgEl.style.display==='grid';cfgEl.style.display=on?'none':'grid';cfgb.style.borderColor=on?'#66707f':INK;cfgb.style.color=on?'#66707f':INK;});
 })();
-requestAnimationFrame(tf);
+window.__REEL={
+ claim:function(){DRIVEN=true;},
+ step:function(m,dt,cfg){DRIVEN=true;if(cfg)applyCfg(cfg);s.value=m;tf(0,dt||1/30);},
+ seed:function(n){var x=(n>>>0)||1;RNG=function(){x=(x*1664525+1013904223)>>>0;return x/4294967296;};},
+ wipe:function(){WIPEP=true;},
+ set:function(o){if(o.mask!==undefined){MASK=null;if(o.mask){MASK={};o.mask.forEach(function(i){MASK[i]=true;});}}if(o.doc!==undefined)DOC=!!o.doc;if(o.bg!==undefined)BGF=!!o.bg;WIPEP=true;},
+ reset:function(){T=0;idx=0;HUE=0;VEL=0;blinkQ=[];nb=3;dwell=0;frun=0;RUN=[];RUNL=null;FI=0;ENVQ.length=0;colT=-99;p.clearRect(0,0,CW,CH);},
+ state:function(){return window.__WST;},
+ cv:cv,pc:pc,ic:ic,dc:dc,telC:_t,scoC:_s2,S:S,CW:CW,CH:CH,SEAM:SEAM,DP:DP,TELW:TELW,TELH:TELH,SCOW:SCOW,SCOH:SCOH,LET:LET,CFG:CFG
+};
+requestAnimationFrame(function(){if(!DRIVEN)tf();});
 })();
 </script>
 </body>
