@@ -1,4 +1,4 @@
-# Where this was left — 2026-08-13
+# Where this was left — 2026-09-01
 
 Both repos clean and pushed. Nothing is stranded on the laptop.
 
@@ -8,6 +8,16 @@ Both repos clean and pushed. Nothing is stranded on the laptop.
 | studies | https://templeoflum.github.io/met3or/studies/ |
 | this repo | `templeoflum/met3or` · public |
 | workbench | `templeoflum/met3or-workbench` · private · `../met3or` |
+
+## 2026-09-01
+
+- Spinor in the frame's box while the engine loads (mobile was dark for a while).
+- Sound arms on release events (`pointerup`/`touchend`/`keydown`) and only once
+  the engine takes it — a tap during load no longer spends it. iPhone silent
+  switch mutes Web Audio; left alone on purpose.
+- Engine resynced (pupils only at the seam; `col` — the wow — joins `__WST`).
+- Stillness: leave the seam, return with sound on, stay for the wow → `thank`
+  (youtu.be/vnaiD0YSrGc) appears under the icons. Once per visit, not persisted.
 
 ## The state
 
