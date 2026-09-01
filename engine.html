@@ -218,7 +218,7 @@ var mm=parseFloat(s.value);
 if(Math.abs(mm-0.5)<0.01)dwell+=1/60;else dwell=0;
 var fT=ss((dwell-2.5)/2.5);frun+=(fT-frun)*0.12;
 var soft=4*mm*(1-mm),sharp=soft*soft;
-var A=amp(T),Aeff=.15+.85*A,dd=Math.abs(mm-.5),n=ob(dd);window.__WST={mm:mm,soft:soft,sharp:sharp,Aeff:Aeff,dwell:dwell,frun:frun,T:T,cfg:CFG};
+var A=amp(T),Aeff=.15+.85*A,dd=Math.abs(mm-.5),n=ob(dd);window.__WST={mm:mm,soft:soft,sharp:sharp,Aeff:Aeff,dwell:dwell,frun:frun,T:T,cfg:CFG,col:0};
 var hueG=Math.exp(-Math.pow((mm-.5)/CFG.gate,2));
 var tv=CFG.fvel*Math.pow(2,n)*(.6+.8*A);VEL+=(tv-VEL)*.06;HUE=(HUE+VEL*hueG)%360;
 var lumF=1.2*Math.pow(2,Math.min(Math.max(n,0),1)),strobe=.5+.5*Math.sin(2*Math.PI*lumF*T);
@@ -226,7 +226,7 @@ var col=0;
 if(hueG>.6&&T>ncol){colT=T;cHold=.3+RNG()*.25;ncol=T+REV*(6+Math.floor(RNG()*8));}
 var ct=T-colT,ctot=.15+cHold+.2;
 if(ct>=0&&ct<ctot){if(ct<.15)col=ease(ct/.15);else if(ct<.15+cHold)col=1;else col=1-ease((ct-.15-cHold)/.2);}
-var sweep=1-.91*col;
+var sweep=1-.91*col;window.__WST.col=col;   // the wow, readable by a host
 setMix(mm,col);
 var spread=1+(.004+.045*soft)*CFG.breath*Math.sin(Math.PI*1.2*T/2);
 function xf(pt,L){var ph=L.sh*2.09,sy=1+(.004+.028*soft+.06*sharp)*CFG.breath*Math.sin(2*Math.PI*1.2*T+ph),sx=1/Math.sqrt(sy),mx=190+CFG.wx+(L.cx-190)*spread;return[(mx+(pt.x-L.cx)*sx)*S,(L.cy+(pt.y-L.cy)*sy)*S];}

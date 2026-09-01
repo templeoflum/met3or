@@ -71,6 +71,16 @@
     fill:currentColor; stroke:none;
   }
 
+  /* stillness — one word, earned: away from the seam, back to it with sound
+     on, and there when the beam skips. Not persisted; the ritual is the point. */
+  #still{
+    color:var(--mu); font-size:12px; letter-spacing:.18em; text-decoration:none;
+    line-height:1; padding:6px 10px; opacity:0; visibility:hidden;
+    transition:opacity 1.2s ease, color .15s ease;
+  }
+  #still.shown{opacity:1; visibility:visible}
+  #still:hover,#still:focus-visible{color:var(--am)}
+
   /* the sound toggle — in the flow, centred, above the mark */
   #snd{
     background:none; border:0; padding:8px; cursor:pointer; line-height:0;
@@ -89,11 +99,13 @@
   <button id="snd" type="button" aria-pressed="false" aria-label="Sound" title="sound"></button>
 
   <div id="stage">
-    <iframe id="engine" src="engine.html?v=8e59eaef" title="MET∃OR" scrolling="no"></iframe>
+    <iframe id="engine" src="engine.html?v=cc89ea6e" title="MET∃OR" scrolling="no"></iframe>
     <span id="spinor" aria-hidden="true"></span>
   </div>
 
   <nav id="links" aria-label="Listen"></nav>
+
+  <a id="still" href="https://youtu.be/vnaiD0YSrGc" target="_blank" rel="noopener noreferrer" aria-hidden="true" tabindex="-1">thank</a>
 
 <script src="links.js"></script>
 <script>
@@ -256,6 +268,36 @@
     fit();
     frame.classList.add("ready");
   });
+
+  // ── stillness ────────────────────────────────────────────────────────
+  // Read the engine's state each frame over the same-origin window (__WST).
+  // away: the sweep left the seam. returned: back within the engine's own
+  // dwell tolerance, sound on. skip: the wow (col) begins while still there
+  // and still sounding. Then the word appears. Once per visit.
+  var still = document.getElementById("still");
+  var stage = 0;                       // 0 opened · 1 away · 2 returned · 3 shown
+  function watch(){
+    if(stage < 3){
+      var w = null;
+      try{ w = frame.contentWindow && frame.contentWindow.__WST; }catch(e){}
+      if(w){
+        var d = Math.abs(w.mm - SEAM);
+        if(stage === 0 && d > 0.1) stage = 1;
+        else if(stage === 1 && d < 0.01 && on) stage = 2;
+        else if(stage === 2){
+          if(d >= 0.01 || !on) stage = 1;          // left again, or went quiet: return again
+          else if(w.col > 0){
+            stage = 3;
+            still.classList.add("shown");
+            still.removeAttribute("aria-hidden");
+            still.removeAttribute("tabindex");
+          }
+        }
+      }
+      requestAnimationFrame(watch);
+    }
+  }
+  requestAnimationFrame(watch);
 
   paint();
   window.addEventListener("resize", fit);
