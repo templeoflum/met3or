@@ -7,8 +7,12 @@
 
 <meta property="og:title" content="MET∃OR">
 <meta property="og:type" content="website">
-<meta property="og:image" content="og.png">
+<meta property="og:image" content="https://templeoflum.github.io/met3or/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://templeoflum.github.io/met3or/og.png">
 
 <style>
   :root{
@@ -54,7 +58,7 @@
   /* links — icons only. render only when links.js has a url. */
   nav{
     display:flex; flex-wrap:wrap; justify-content:center; align-items:center;
-    gap:clamp(14px,3.5vw,26px);
+    gap:clamp(2px,1.5vw,12px);
   }
   nav:empty{display:none}
   a{
@@ -62,7 +66,12 @@
     transition:color .15s ease, transform .15s ease;
   }
   a:hover,a:focus-visible{transform:translateY(-2px)}
-  a:focus-visible{outline:none}
+  a:focus-visible{outline:1px solid var(--am);outline-offset:4px}
+  nav a{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
+  #compilation{font-size:12px;letter-spacing:.12em;line-height:1.5;min-height:44px;display:flex;align-items:center;text-decoration:none;color:#9aa6b5}
+  body{height:auto;min-height:100%;padding-block:28px}
+  #still{min-height:44px;display:flex;align-items:center}
+  #snd:focus-visible{outline:1px solid var(--am);outline-offset:4px}
   a.p:hover,a.p:focus-visible{color:var(--am)}
   a.m:hover,a.m:focus-visible{color:var(--bl)}
   a.z:hover,a.z:focus-visible{color:var(--gr)}
@@ -86,7 +95,7 @@
     background:none; border:0; padding:8px; cursor:pointer; line-height:0;
     color:var(--mu); transition:color .15s ease, transform .15s ease;
   }
-  #snd:hover,#snd:focus-visible{color:var(--ink); transform:translateY(-1px); outline:none}
+  #snd:hover,#snd:focus-visible{color:var(--ink); transform:translateY(-1px)}
   #snd.on{color:var(--gr)}
   #snd.on:hover{color:var(--gr)}
   #snd svg{width:clamp(26px,6vw,32px);height:auto;display:block}
@@ -105,7 +114,9 @@
 
   <nav id="links" aria-label="Listen"></nav>
 
-  <a id="still" href="https://youtu.be/vnaiD0YSrGc" target="_blank" rel="noopener noreferrer" aria-hidden="true" tabindex="-1">thank</a>
+  <a id="compilation" class="z" href="https://hypeddit.com/synthesis/catalyst-vol1" target="_blank" rel="noopener noreferrer" aria-label="Catalyst Vol. 1 — compilation (opens in a new tab)">catalyst vol. 1 ↗</a>
+
+  <a id="still" href="key.html" aria-label="thank — cipher key" aria-hidden="true" tabindex="-1">thank</a>
 
 <script src="links.js"></script>
 <script>
@@ -176,7 +187,8 @@
     try{
       var d = frame.contentDocument;
       if(!d || !d.documentElement) return;
-      var h = d.documentElement.scrollHeight;
+      var wrap = d.getElementById("wrap");
+      var h = wrap ? Math.ceil(wrap.getBoundingClientRect().height) + 16 : d.documentElement.scrollHeight;
       if(h > 80) frame.style.height = h + "px";
     }catch(e){ /* file:// blocks this; the CSS height stands */ }
   }
@@ -256,6 +268,8 @@
         var st = d.createElement("style");
         st.textContent = HIDE;
         d.head.appendChild(st);
+        var sweep = d.getElementById("s");
+        if(sweep){ sweep.setAttribute("aria-label", "Sweep — return to the centre for stillness"); }
         if(typeof ResizeObserver === "function" && d.body){
           new ResizeObserver(fit).observe(d.body);
         }
