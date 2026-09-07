@@ -8,15 +8,15 @@ const costumes = new Map();
 [ ["+†‡⊕﬩","+"], ["0OØ⊙∅","0"], ["−-–⊖˗","−"] ].forEach(([pool,value]) => Array.from(pool).forEach(c => costumes.set(c,value)));
 function decode(text, mirror = false) {
   const rows = text.replace(/\r/g, "").trim().split("\n");
-  if(!text.trim()) throw new Error("Enter signs or load a signal first.");
+  if(!text.trim()) throw new Error("No input. Enter signs or select a stored signal.");
   return rows.map((row,i) => {
     let normalized = "";
     for(const c of row.normalize("NFD")) {
       if(/\s|\p{M}/u.test(c)) continue;
-      if(!costumes.has(c)) throw new Error("Row " + (i+1) + ": unrecognized sign “" + c + "”. Use the listed signs or costumes.");
+      if(!costumes.has(c)) throw new Error("Row " + (i+1) + ": invalid sign “" + c + "”. Refer to the equivalent-sign table.");
       normalized += costumes.get(c);
     }
-    if(!normalized.length || normalized.length % 3) throw new Error("Row " + (i+1) + ": keep complete triples on every row.");
+    if(!normalized.length || normalized.length % 3) throw new Error("Row " + (i+1) + ": incomplete triple. Each row requires a multiple of three signs.");
     if(i % 2) normalized = Array.from(normalized).reverse().join("");
     if(mirror) normalized = negate(normalized);
     return normalized.match(/.{3}/g).map(t => letters.get(t)).join("");
@@ -24,7 +24,7 @@ function decode(text, mirror = false) {
 }
 const input = document.getElementById("signal"), result = document.getElementById("result");
 ["a","b"].forEach(key => document.getElementById("load-"+key).addEventListener("click", () => {
-  input.value = signals[key].join("\n"); result.textContent = "Signal " + key.toUpperCase() + " loaded. Ready to decode.";
+  input.value = signals[key].join("\n"); result.textContent = "Signal " + key.toUpperCase() + " loaded.";
   result.classList.remove("error"); input.focus();
 }));
 document.getElementById("decode-form").addEventListener("submit", e => {
@@ -40,7 +40,7 @@ document.getElementById("answers").addEventListener("toggle", e => {
   if(!e.target.open) return;
   ["a","b"].forEach(key => {
     const p = document.createElement("p"); p.className = "answer";
-    p.textContent = "Signal " + key.toUpperCase() + "\n" + decode(signals[key].join("\n")) + "\nMirror: " + decode(signals[key].join("\n"), true);
+    p.textContent = "Signal " + key.toUpperCase() + "\n" + decode(signals[key].join("\n")) + "\nConjugate: " + decode(signals[key].join("\n"), true);
     content.appendChild(p);
   });
 });
