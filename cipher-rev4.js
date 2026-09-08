@@ -9,7 +9,7 @@ function physical(text,row){return row%2?Array.from(text).reverse().join(''):tex
 function decode(text,mirror=false){
 const pools={};[['+†‡⊕﬩','+'],['0OØ⊙∅','0'],['−-–⊖˗','−']].forEach(([p,v])=>Array.from(p,c=>pools[c]=v));
 text=text.replace(/\r/g,'').trim();if(/^KEY\s*\//i.test(text)){const lines=text.split('\n');if(!/^KEY\s*\/\s*\+\+\s*$/i.test(lines.shift()))throw Error('Key revision mismatch. Select the matching archived key.');text=lines.join('\n').trim();}if(!text)throw Error('No input.');
-const stream=text.split('\n').map((row,i)=>{let s='';row=row.replace(/___/g,'');for(const c of row.normalize('NFD')){if(/\s|\p{M}/u.test(c))continue;if(c==='.'){s+='.';continue;}if(!(c in pools))throw Error('Row '+(i+1)+': invalid sign “'+c+'”.');s+=pools[c];}if(!s.replace(/\./g,'').length||s.replace(/\./g,'').length%3)throw Error('Row '+(i+1)+': incomplete triple.');if(i%2)s=Array.from(s).reverse().join('');return mirror?negate(s):s;}).join('');
+const stream=text.split('\n').map((row,i)=>{let s='';for(const c of row.normalize('NFD')){if(/\s|\p{M}/u.test(c))continue;if(c==='.'){s+='.';continue;}if(!(c in pools))throw Error('Row '+(i+1)+': invalid sign “'+c+'”.');s+=pools[c];}if(!s.replace(/\./g,'').length||s.replace(/\./g,'').length%3)throw Error('Row '+(i+1)+': incomplete triple.');if(i%2)s=Array.from(s).reverse().join('');return mirror?negate(s):s;}).join('');
 let decoded='',pending='';for(const c of stream){if(c==='.'){if(pending.length||!/[A-Z]$/.test(decoded))throw Error('Full stop must follow a complete word.');decoded+='.';}else{pending+=c;if(pending.length===3){decoded+=inverse[pending];pending='';}}}if(pending.length)throw Error('Incomplete triple.');return decoded;
 }
 scope.CipherV4={encode,decode,physical,clean,negate,revision:4,mark:'++'};
