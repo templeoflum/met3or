@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signals · MET∃OR</title><meta name="description" content="Live signals and decoder.">
+<link rel="stylesheet" href="signals.css"><script src="cipher-rev4.js" defer></script><script src="signals-locks.js" defer></script><script src="signals.js" defer></script></head>
+<body><main>
+<a class="back" href="index.html" aria-label="Return to the instrument">← return</a>
+<header><p class="eyebrow">KEY / ++</p><h1>Signals</h1><p>Load a signal. Decode it.</p></header>
+<section aria-labelledby="live"><h2 id="live">01 / live</h2>
+<div class="actions" id="signal-list"></div>
+</section>
+<section aria-labelledby="try"><h2 id="try">02 / decoder</h2>
+<form id="decode-form"><label for="signal">Signs / physical rows</label><textarea id="signal" rows="6" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="input-help" required></textarea><p id="input-help" class="note">Load a signal above, or paste one row per line. Accepted: +, 0, −, the key's equivalents, and full stops.</p>
+<button type="submit">Decode</button><p id="result" role="status" aria-live="polite" aria-atomic="true"></p></form>
+</section>
+<section aria-labelledby="answer"><h2 id="answer">03 / answer</h2>
+<form id="answer-form"><label for="word">Word</label><input type="text" id="word" spellcheck="false" autocapitalize="characters" autocomplete="off" autocorrect="off" enterkeyhint="send">
+<button type="submit">Send</button><p id="opened" role="status" aria-live="polite" aria-atomic="true"></p></form>
+</section>
+<p class="note"><a href="key.html">Reading key</a></p>
+<noscript><p>Decoder unavailable. JavaScript required.</p></noscript>
+</main></body></html>
