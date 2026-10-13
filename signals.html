@@ -1,21 +1,44 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Signals · MET∃OR</title><meta name="description" content="Live signals and decoder.">
-<link rel="stylesheet" href="signals.css?v=4"><script src="cipher-rev4.js" defer></script><script src="signals-locks.js?v=2" defer></script><script src="signals.js?v=4" defer></script></head>
-<body class="signals"><main class="sig">
-<a class="back" href="index.html" aria-label="Return to the instrument">← return</a>
-<header><p class="eyebrow">KEY / ++</p><h1>Signals</h1></header>
-<section aria-labelledby="live"><h2 id="live">01 / live</h2>
-<div id="rounds"></div>
-</section>
-<section aria-labelledby="try"><h2 id="try">02 / decoder</h2>
-<form id="decode-form"><label for="signal">Signs / physical rows</label><textarea id="signal" rows="6" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="input-help" required></textarea><p id="input-help" class="note">Paste one row per line. Accepted: +, 0, −, the key's equivalents, and full stops.</p>
-<div class="actions"><button type="submit">Decode</button><button type="button" id="flip">MET∃OR ⇄ ЯOET∃M</button></div><p id="result" role="status" aria-live="polite" aria-atomic="true"></p></form>
-</section>
-<section aria-labelledby="answer"><h2 id="answer">03 / answer</h2>
-<form id="answer-form"><label for="word">Word</label><input type="text" id="word" spellcheck="false" autocapitalize="characters" autocomplete="off" autocorrect="off" enterkeyhint="send">
-<button type="submit">Send</button><div id="opened" role="status" aria-live="polite" aria-atomic="true"></div></form>
-</section>
-<p class="note"><a href="key.html">Reading key</a></p>
+<link rel="stylesheet" href="signals.css?v=6"><script src="cipher-rev4.js" defer></script><script src="signals-locks.js?v=2" defer></script><script src="signals.js?v=5" defer></script></head>
+<body class="signals">
+  <section class="sig" aria-label="Signal">
+    <div id="rounds"></div>
+    <p class="desk-h">On the desk</p>
+    <div class="dev" role="group" aria-label="Pocket reader">
+      <div class="brand"><span>BIC · pocket reader</span><i>PR–2</i></div>
+      <div class="lcd">
+        <div class="ind"><span class="on">KEY ++</span><span class="i-a">WORLD A</span><span class="i-b">WORLD B</span><span>BAT</span></div>
+        <textarea id="tape" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Reader memory" placeholder="MEMORY EMPTY"></textarea>
+        <hr><pre id="out" role="status" aria-live="polite"></pre>
+      </div>
+      <div class="keys"><button class="k" id="paste" type="button">PASTE</button><button class="k" id="decode" type="button">READ</button></div>
+      <div class="slide">
+        <span class="l lA">A<b>MET∃OR</b></span>
+        <button id="flip" type="button" aria-pressed="false" aria-label="World A or B"><span class="knob"></span></button>
+        <span class="l lB">B<b>ЯOET∃M</b></span>
+      </div>
+      <div class="grille"><i></i><i></i><i></i><i></i><i></i></div>
+      <span class="dev-note pencil dn-paste">paste it in.</span>
+      <span class="dev-note pencil dn-flip">nonsense means far side. slide it over.</span>
+    </div>
+    <div class="slipwrap" role="group" aria-label="The slip">
+      <span class="pencil">the last word. on the slip.</span>
+      <div class="slip">
+        <div class="ch"><svg viewBox="0 0 44 34" aria-hidden="true"><path class="s" d="M6 6 H32 M38 6 V16 M38 16 H12 M6 16 V26 M6 26 H32"/><path class="a" d="M32 2.4 L38.4 6 L32 9.6 Z"/><path class="a" d="M12 12.4 L5.6 16 L12 19.6 Z"/><path class="a" d="M32 22.4 L38.4 26 L32 29.6 Z"/></svg>
+          <div><b>BOUSTROPHEDON INSTRUMENT CO.</b><span>Test equipment · est. 1947</span></div></div>
+        <p class="ask">Found one of ours? We’d love to see it.</p>
+        <form id="word-form" autocomplete="off"><label>It says:<input id="word" spellcheck="false" autocapitalize="characters" autocomplete="off" autocorrect="off" enterkeyhint="send"></label><button id="send" type="submit">CHECK</button></form>
+        <span id="said" role="status"></span>
+        <p id="note">Found one of yours. It says <span class="note-word"></span>.</p>
+        <p class="setl"><a id="setlink" target="_blank" rel="noopener"></a></p>
+      </div>
+      <div class="door" aria-hidden="true"><span class="plate">STANDARDS ROOM</span><span class="panel"></span><span class="light"></span><span class="gap"></span></div>
+      <a id="file">Slip it under · send to the company</a>
+      <p class="filed-line">Under the door. The note is copied; paste it in the message.</p>
+    </div>
+  </section>
+  <a class="back" href="index.html" aria-label="Return to the instrument">← return</a>
 <noscript><p>Decoder unavailable. JavaScript required.</p></noscript>
-</main></body></html>
+</body></html>
