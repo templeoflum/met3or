@@ -17,7 +17,7 @@ const signals = [
   {id: "two", label: "signal two", reel: "", rows: []}
 ];
 const KEY = "KEY / ++";
-const DM = "https://ig.me/m/boustrophedon.instruments";
+const DM = "https://www.instagram.com/boustrophedon.instruments/";
 
 const $ = id => document.getElementById(id);
 const el = (tag, cls, text) => {const e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e;};
@@ -25,7 +25,7 @@ const root = document.querySelector(".sig");
 const live = signals.filter(s => s.rows.length);
 const caption = s => [KEY, ...s.rows].join("\n");
 const solved = live.map(s => CipherV4.decode(caption(s), true));
-const st = {copied: false, loaded: false, out: "none", open: false, filed: false};
+const st = {copied: false, loaded: false, out: "none", open: false, filed: false, hand: false};
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function stage() {
@@ -36,6 +36,7 @@ function stage() {
   root.classList.toggle("s-solved", st.out === "solved" || st.open);
   root.classList.toggle("s-open", st.open);
   root.classList.toggle("s-filed", st.filed);
+  root.classList.toggle("s-hand", st.hand);
   let next;
   if (st.filed) next = null;
   else if (st.open) next = "file";
@@ -191,12 +192,21 @@ form.addEventListener("submit", async e => {
 });
 word.addEventListener("input", () => {said.textContent = ""; said.className = "";});
 
-// ── under the door: the note is copied, the DM to the company opens ────
+// ── under the door: the note is copied, the company's profile opens ────
+// The copy runs inside the tap, before the profile opens: the select-and-copy
+// first (in-app browsers allow it), the async clipboard as well. If neither
+// takes, the slip stays up with the note selected so it can be copied by hand.
 const file = $("file"), note = $("note");
 file.href = DM; file.target = "_blank"; file.rel = "noopener";
 file.addEventListener("click", () => {
-  toClipboard(note.textContent.replace(/\s+/g, " ").trim(), note);
-  st.filed = true; stage();
+  const r = document.createRange(); r.selectNodeContents(note);
+  const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+  let ok = false;
+  try {ok = document.execCommand("copy");} catch {}
+  const text = note.textContent.replace(/\s+/g, " ").trim();
+  const done = ok => {st.filed = true; st.hand = !ok; if (ok) getSelection().removeAllRanges(); stage();};
+  if (ok) {done(true); navigator.clipboard?.writeText(text).catch(() => {}); return;}
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => done(true), () => done(false));
+  else done(false);
 });
-
 stage();

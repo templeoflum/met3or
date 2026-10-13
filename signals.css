@@ -111,13 +111,17 @@ background:repeating-linear-gradient(93deg,rgba(0,0,0,.1) 0 2px,transparent 2px 
 .sig .door .plate{position:absolute;left:50%;top:22px;transform:translateX(-50%);background:linear-gradient(180deg,#c9ad6c,#9d8048);padding:4px 10px;border-radius:2px;font:600 8px/1 var(--sans);letter-spacing:.26em;color:#3a2c12;white-space:nowrap}
 .sig .door .gap{position:absolute;left:0;right:0;bottom:0;height:7px;background:#0b0907}
 .sig .door .light{position:absolute;left:10%;right:10%;bottom:7px;height:10px;background:radial-gradient(60% 100% at 50% 100%,rgba(255,230,170,.22),transparent)}
-.sig #file{display:none;position:relative;z-index:3;margin-top:14px;text-align:center;text-decoration:none;background:var(--type);color:var(--paper);border-radius:3px;padding:14px 10px;font:700 11.5px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase}
+.sig #file{display:none;position:relative;z-index:3;margin-top:14px;text-align:center;text-decoration:none;background:var(--type);color:var(--paper);border-radius:3px;padding:14px 10px;font:700 14px/1.4 var(--sans);letter-spacing:.03em}
+.sig #file .at{white-space:nowrap}
 .sig.s-open #file{display:block}
 .sig #file.next{box-shadow:0 0 0 3px rgba(220,196,142,.75)}
 .sig.s-filed .slip{transform:translateY(162px) rotate(0deg) scaleY(.04);opacity:0}
-.sig.s-filed #file{background:#45603f}.sig.s-filed #file::after{content:" · sent"}
+.sig.s-filed #file{background:#45603f}
+.sig.s-filed.s-hand .slip{transform:rotate(-1deg);opacity:1}
+.sig.s-hand #note{user-select:text;-webkit-user-select:text;outline:2px solid #dcc48e}
 .sig .filed-line{display:none;margin:10px 4px 0;font:13px/1.4 var(--sans);color:#e2d4b8}
 .sig.s-filed .filed-line{display:block}
+.sig .filed-line .hand,.sig.s-hand .filed-line .ok{display:none}.sig.s-hand .filed-line .hand{display:inline}
 
 /* signals.html: the panel on its own */
 body.signals{margin:0;background:#05080c;display:flex;flex-direction:column;align-items:center;padding:28px 20px 60px}
