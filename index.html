@@ -14,10 +14,10 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://templeoflum.github.io/met3or/og.png">
 
-<link rel="stylesheet" href="signals.css?v=7">
+<link rel="stylesheet" href="signals.css?v=8">
 <script src="cipher-rev4.js" defer></script>
 <script src="signals-locks.js?v=2" defer></script>
-<script src="signals.js?v=6" defer></script>
+<script src="signals.js?v=7" defer></script>
 
 <style>
   :root{
@@ -167,6 +167,27 @@
   .drawer .page .sheet{margin:0}
   .drawer .page .slipwrap{margin-top:30px}
   @media(prefers-reduced-motion:reduce){.drawer{transition-duration:.01s}.drawer .pages{scroll-behavior:auto}}
+
+  /* a desk wide enough: the file lies open, every page at once, in reading order, a little
+     overlapped and turned; the whole spread is scaled as one (--z, set from the room it has) */
+  @media (min-width:900px) and (min-height:561px){
+    .drawer .pages{overflow:hidden;scroll-snap-type:none;justify-content:center;align-items:center;padding:0 40px}
+    .drawer .page{flex:none;overflow:visible;padding:0;zoom:var(--z,1);
+      transform:translateY(var(--dy,0)) rotate(var(--r,0deg));transition:transform .35s cubic-bezier(.3,.7,.3,1),filter .35s ease}
+    .drawer .page+.page{margin-left:-4px}
+    .drawer .page>.in{margin:0;max-width:none}
+    .drawer .page.p-footage>.in{width:330px}
+    .drawer .page.p-transcript>.in{width:400px}
+    .drawer .page.p-reader>.in{width:320px}
+    .drawer .page.p-slip>.in{width:320px;padding-top:34px}
+    .drawer .page.p-footage{--r:-1.6deg;--dy:6px}
+    .drawer .page.p-transcript{--r:.9deg;--dy:-4px}
+    .drawer .page.p-reader{--r:-1deg;--dy:8px}
+    .drawer .page.p-slip{--r:1.4deg;--dy:-2px}
+    .drawer .page.up{z-index:2;--r:0deg;--dy:-10px;filter:drop-shadow(0 22px 26px rgba(0,0,0,.45))}
+    .drawer .page .slipwrap{margin-top:0}
+  }
+  @media (min-width:900px) and (min-height:561px) and (prefers-reduced-motion:reduce){.drawer .page{transition:none}}
 </style>
 </head>
 <body>
@@ -458,25 +479,55 @@ addEventListener("DOMContentLoaded", function(){
     var sheet = f.querySelector(".sheet");
     var hint = sheet && sheet.querySelector(".copyrow .pencil");
     if(hint) hint.textContent = "then the reader →";
-    page("footage", "", [f]);
-    if(sheet) page("transcript", "", [sheet]);
+    page("footage", "p-footage", [f]);
+    if(sheet) page("transcript", "p-transcript", [sheet]);
   });
   var reader = page("reader", "p-reader", [sig.querySelector(".dev")]);
   var slip = page("slip", "p-slip", [sig.querySelector(".slipwrap")]);
   sig.appendChild(ix); sig.appendChild(pages);
 
-  function go(p){ pages.scrollTo({left:p.offsetLeft - pages.offsetLeft, behavior:"smooth"}); }
+  // a wide desk lays the pages out side by side (the media query in the style); a tab then lifts its page
+  var wide = matchMedia("(min-width:900px) and (min-height:561px)"), up = list[0].page;
+  function go(p){
+    if(wide.matches){ up = p; mark(); return; }
+    pages.scrollTo({left:p.offsetLeft - pages.offsetLeft, behavior:"smooth"});
+  }
   function mark(){
     var x = pages.scrollLeft + pages.clientWidth / 2;
     list.forEach(function(l){
-      var on = l.page.offsetParent !== null && x >= l.page.offsetLeft - pages.offsetLeft && x < l.page.offsetLeft - pages.offsetLeft + l.page.offsetWidth;
+      var on = l.page.offsetParent !== null && (wide.matches ? l.page === up :
+        x >= l.page.offsetLeft - pages.offsetLeft && x < l.page.offsetLeft - pages.offsetLeft + l.page.offsetWidth);
       l.tab.setAttribute("aria-current", String(on));
+      l.page.classList.toggle("up", wide.matches && on);
       if(on) l.tab.classList.remove("fresh");
     });
   }
+  // the spread's scale: as large as the desk allows, the same for type, paper and pencil
+  function fit(){
+    if(!wide.matches){ pages.style.removeProperty("--z"); return; }
+    pages.style.setProperty("--z", "1");
+    var w = 0, h = 0;
+    list.forEach(function(l){
+      if(l.page.offsetParent === null) return;
+      w += l.page.offsetWidth + (parseFloat(getComputedStyle(l.page).marginLeft) || 0);
+      h = Math.max(h, l.page.offsetHeight);
+    });
+    var z = Math.min((pages.clientWidth - 80) / w, (pages.clientHeight - 70) / (h + 40), 1.7);
+    pages.style.setProperty("--z", String(Math.max(.6, Math.floor(z * 100) / 100)));
+  }
+  function lay(){ fit(); mark(); }
+  sig.addEventListener("focusin", function(e){
+    var p = wide.matches && e.target.closest && e.target.closest(".page");
+    if(p && p !== up) go(p);
+  });
+  sig.addEventListener("pointerdown", function(e){
+    var p = wide.matches && e.target.closest && e.target.closest(".page");
+    if(p && p !== up) go(p);
+  });
   pages.addEventListener("scroll", mark, {passive:true});
-  window.addEventListener("resize", mark);
-  mark();
+  window.addEventListener("resize", lay);
+  if(wide.addEventListener) wide.addEventListener("change", lay);
+  lay();
 
   // copied: turn to the reader. solved: the slip page comes in, turn to it.
   sig.addEventListener("click", function(e){
@@ -488,7 +539,7 @@ addEventListener("DOMContentLoaded", function(){
     // solved: the slip page joins the file and its tab calls; the clue stays put until they turn
     var st = ix.querySelector(".t-slip");
     if(now && !was && st) st.classList.add("fresh");
-    was = now; mark();
+    was = now; lay();
   }).observe(sig, {attributes:true, attributeFilter:["class"]});
 
   document.addEventListener("keydown", function(e){
