@@ -18,6 +18,7 @@ const signals = [
 ];
 const KEY = "KEY / ++";
 const DM = "https://www.instagram.com/boustrophedon.instruments/";
+const APP = "instagram://user?username=boustrophedon.instruments";
 
 const $ = id => document.getElementById(id);
 const el = (tag, cls, text) => {const e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e;};
@@ -194,19 +195,39 @@ word.addEventListener("input", () => {said.textContent = ""; said.className = ""
 
 // ── under the door: the note is copied, the company's profile opens ────
 // The copy runs inside the tap, before the profile opens: the select-and-copy
-// first (in-app browsers allow it), the async clipboard as well. If neither
-// takes, the slip stays up with the note selected so it can be copied by hand.
-const file = $("file"), note = $("note");
+// first (in-app browsers allow it), the async clipboard as well. Whether or not
+// it takes, the slip stays up with the note on it, so it can be copied by hand
+// every time; the word is kept for the session so a reload brings the slip back.
+// On a phone the tap asks for the Instagram app at BIC's profile (no login
+// screen); if the page is still showing after a short wait, the app didn't
+// open, and the web profile loads instead. A desktop opens the web profile.
+const file = $("file"), note = $("note"), KEPT = "met3or-slip";
+const phone = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
 file.href = DM; file.target = "_blank"; file.rel = "noopener";
-file.addEventListener("click", () => {
+function toApp() {
+  const t0 = Date.now();
+  let left = false;
+  const away = () => {left = true;};
+  addEventListener("pagehide", away, {once: true});
+  document.addEventListener("visibilitychange", () => {if (document.hidden) away();}, {once: true});
+  location.href = APP;
+  setTimeout(() => {if (!left && !document.hidden && Date.now() - t0 < 3500) location.href = DM;}, 2000);
+}
+file.addEventListener("click", e => {
+  if (phone) e.preventDefault();
   const r = document.createRange(); r.selectNodeContents(note);
   const s = getSelection(); s.removeAllRanges(); s.addRange(r);
   let ok = false;
   try {ok = document.execCommand("copy");} catch {}
   const text = note.textContent.replace(/\s+/g, " ").trim();
-  const done = ok => {st.filed = true; st.hand = !ok; if (ok) getSelection().removeAllRanges(); stage();};
-  if (ok) {done(true); navigator.clipboard?.writeText(text).catch(() => {}); return;}
-  if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => done(true), () => done(false));
+  try {sessionStorage.setItem(KEPT, note.querySelector(".note-word").textContent);} catch {}
+  const done = ok => {st.filed = true; st.hand = !ok; stage();};
+  if (ok) {done(true); navigator.clipboard?.writeText(text).catch(() => {});}
+  else if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => done(true), () => done(false));
   else done(false);
+  if (phone) toApp();
 });
+let kept = null;
+try {kept = sessionStorage.getItem(KEPT);} catch {}
+if (kept) {word.value = kept; st.filed = true; st.hand = true; form.requestSubmit();}
 stage();

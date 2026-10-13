@@ -115,13 +115,11 @@ background:repeating-linear-gradient(93deg,rgba(0,0,0,.1) 0 2px,transparent 2px 
 .sig #file .at{white-space:nowrap}
 .sig.s-open #file{display:block}
 .sig #file.next{box-shadow:0 0 0 3px rgba(220,196,142,.75)}
-.sig.s-filed .slip{transform:translateY(162px) rotate(0deg) scaleY(.04);opacity:0}
 .sig.s-filed #file{background:#45603f}
-.sig.s-filed.s-hand .slip{transform:rotate(-1deg);opacity:1}
-.sig.s-hand #note{user-select:text;-webkit-user-select:text;outline:2px solid #dcc48e}
+.sig.s-filed #note{user-select:all;-webkit-user-select:all;-webkit-touch-callout:default;outline:2px solid #dcc48e}
 .sig .filed-line{display:none;margin:10px 4px 0;font:13px/1.4 var(--sans);color:#e2d4b8}
 .sig.s-filed .filed-line{display:block}
-.sig .filed-line .hand,.sig.s-hand .filed-line .ok{display:none}.sig.s-hand .filed-line .hand{display:inline}
+.sig.s-hand .filed-line .ok{display:none}
 
 /* signals.html: the panel on its own */
 body.signals{margin:0;background:#05080c;display:flex;flex-direction:column;align-items:center;padding:28px 20px 60px}
