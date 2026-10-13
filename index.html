@@ -14,10 +14,10 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://templeoflum.github.io/met3or/og.png">
 
-<link rel="stylesheet" href="signals.css?v=3">
+<link rel="stylesheet" href="signals.css?v=4">
 <script src="cipher-rev4.js" defer></script>
 <script src="signals-locks.js?v=2" defer></script>
-<script src="signals.js" defer></script>
+<script src="signals.js?v=4" defer></script>
 
 <style>
   :root{
@@ -121,11 +121,11 @@
 
   <section class="sig" aria-label="Signal">
     <p class="eyebrow">KEY / ++ · 01 / live</p>
-    <div class="actions" id="signal-list"></div>
-    <form id="decode-form"><textarea id="signal" rows="6" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Signs / physical rows" required></textarea>
-      <p><button type="submit">Decode</button></p><p id="result" role="status" aria-live="polite" aria-atomic="true"></p></form>
+    <div id="rounds"></div>
+    <form id="decode-form"><textarea id="signal" rows="6" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Signs / physical rows" required></textarea>
+      <div class="actions"><button type="submit">Decode</button><button type="button" id="flip">MET∃OR ⇄ ЯOET∃M</button></div><p id="result" role="status" aria-live="polite" aria-atomic="true"></p></form>
     <form id="answer-form"><div class="pair"><input type="text" id="word" aria-label="Word" placeholder="word" spellcheck="false" autocapitalize="characters" autocomplete="off" autocorrect="off" enterkeyhint="send"><button type="submit">Send</button></div>
-      <p id="opened" role="status" aria-live="polite" aria-atomic="true"></p></form>
+      <div id="opened" role="status" aria-live="polite" aria-atomic="true"></div></form>
   </section>
 
   <button id="snd" type="button" aria-pressed="false" aria-label="Sound" title="sound"></button>
@@ -284,7 +284,13 @@
     window.addEventListener(t, arm, { once:false, passive:true });
   });
 
-  frame.addEventListener("load", function(){
+  // The frame can finish loading before this script runs (it did once the
+  // signal panel's scripts joined the head), so a missed load event is
+  // caught below: same handler, once.
+  var framed = false;
+  function onFrame(){
+    if(framed) return;
+    framed = true;
     try{
       var d = frame.contentDocument;
       if(d){
@@ -304,7 +310,12 @@
     toSeam();
     fit();
     frame.classList.add("ready");
-  });
+  }
+  frame.addEventListener("load", onFrame);
+  try{
+    var fd = frame.contentDocument;
+    if(fd && fd.readyState === "complete" && fd.URL !== "about:blank") onFrame();
+  }catch(e){}
 
   // ── stillness ────────────────────────────────────────────────────────
   // Read the engine's state each frame over the same-origin window (__WST).
