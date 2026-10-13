@@ -135,6 +135,11 @@
     border-radius:7px 7px 0 0;color:#5d5b55;font:italic 14px/1 Georgia,serif;box-shadow:0 -6px 22px rgba(0,0,0,.55);transition:transform .15s ease}
   .drawer:not(.open) .pull button:hover,.drawer:not(.open) .pull button:focus-visible{transform:translateY(-3px);outline:none}
   .drawer .pull button:focus-visible{outline:1px solid var(--am);outline-offset:3px}
+  /* until the file has been opened once, its tab lifts and settles every few seconds */
+  .drawer.beckon:not(.open) .pull button{animation:beckon 5.5s ease-in-out 1.5s infinite}
+  .drawer.beckon:not(.open) .pull button:hover,.drawer.beckon:not(.open) .pull button:focus-visible{animation:none}
+  @keyframes beckon{0%,84%,100%{transform:none}89%{transform:translateY(-8px)}94%{transform:translateY(0)}97%{transform:translateY(-2px)}}
+  @media(prefers-reduced-motion:reduce){.drawer.beckon:not(.open) .pull button{animation:none;box-shadow:0 -6px 22px rgba(0,0,0,.55),0 0 0 2px #f1dcaa,0 0 18px rgba(241,220,170,.45)}}
 
   .drawer .sig{flex:1;min-height:0;width:100%;max-width:none;margin:0;padding:0;display:flex;flex-direction:column;
     background:linear-gradient(180deg,#c9ae74 0 3px,transparent 3px),repeating-linear-gradient(93deg,rgba(0,0,0,.1) 0 2px,transparent 2px 9px),radial-gradient(80% 60% at 50% 40%,#4e3826,#2a1e15 70%,#160f0a)}
@@ -306,13 +311,12 @@
 
   // ── sound ─────────────────────────────────────────────────────────────
   // The engine owns the audio graph behind its own #snd button, which builds
-  // the AudioContext on first click and resumes it if suspended. Autoplay
-  // policy means no page can start audio unprompted, so we arm it on the
-  // first real gesture anywhere — a click, a key, a drag of the sweep — and
-  // this toggle turns it back off. We drive the engine's own button so the
-  // audio graph stays entirely the engine's business.
+  // the AudioContext on first click and resumes it if suspended. Sound
+  // starts only from this toggle — nothing else on the page arms it. We
+  // drive the engine's own button so the audio graph stays entirely the
+  // engine's business.
   var sndBtn = document.getElementById("snd");
-  var on = false, armed = false;
+  var on = false;
 
   var SPK = '<path class="body" d="M3 9.5v5h3.6L11 18V6L6.6 9.5H3z"/>';
   var ICON = {
@@ -344,22 +348,7 @@
   }
 
   sndBtn.addEventListener("click", function(){
-    armed = true;                       // an explicit click is its own arming
     if(engineToggle()){ on = !on; paint(); }
-  });
-
-  // First gesture anywhere arms the sound, so it is on by the time the sweep
-  // is touched. Once only, and never fighting an explicit toggle. The arming
-  // is spent only when the engine actually took it — a tap that lands before
-  // the frame has loaded must not use it up. Release events, not press: iOS
-  // WebKit unlocks audio on touchend/click/keydown, not on touchstart.
-  function arm(e){
-    if(armed || on) return;
-    if(e && sndBtn.contains(e.target)) return;   // the button speaks for itself
-    if(engineToggle()){ armed = true; on = true; paint(); }
-  }
-  ["pointerup","touchend","keydown"].forEach(function(t){
-    window.addEventListener(t, arm, { once:false, passive:true });
   });
 
   // The frame can finish loading before this script runs (it did once the
@@ -380,9 +369,6 @@
         if(typeof ResizeObserver === "function" && d.body){
           new ResizeObserver(fit).observe(d.body);
         }
-        // a gesture inside the frame (dragging the sweep) arms it too
-        d.addEventListener("pointerup", function(){ arm(null); }, { passive:true });
-        d.addEventListener("touchend", function(){ arm(null); }, { passive:true });
       }
     }catch(e){}
     toSeam();
@@ -436,8 +422,15 @@ addEventListener("DOMContentLoaded", function(){
   var drawer = document.getElementById("drawer"), pull = document.getElementById("pull"),
       sig = document.getElementById("sigfile"), front = [].slice.call(document.body.children).filter(function(e){
         return e !== drawer && e.tagName !== "SCRIPT"; });
+  // the tab beckons until the file has been opened once, then never again
+  var SEEN = "met3or-file-opened";
+  try{ if(!localStorage.getItem(SEEN)) drawer.classList.add("beckon"); }catch(e){ drawer.classList.add("beckon"); }
   function setOpen(o){
     drawer.classList.toggle("open", o);
+    if(o && drawer.classList.contains("beckon")){
+      drawer.classList.remove("beckon");
+      try{ localStorage.setItem(SEEN, "1"); }catch(e){}
+    }
     document.body.classList.toggle("filing", o);
     pull.setAttribute("aria-expanded", String(o));
     if(o) sig.removeAttribute("inert"); else sig.setAttribute("inert", "");
